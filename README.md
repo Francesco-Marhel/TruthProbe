@@ -47,3 +47,18 @@ The code in this repository is licensed under the Apache License 2.0. If you use
 * Author: Francesco Karim Vicidomini
 * Date: June 2026
 
+* ## Citation
+
+If you use this theoretical framework or implementation in your research, please use the following BibTeX entry:
+
+```bibtex
+@misc{vicidomini2026truth,
+  author       = {Vicidomini, Francesco Karim},
+  title        = {How Much of Truth Fits on a Single Axis? Knowledge-Dependent Dimensionality and Unsupervised Polarity Recovery in Large Language Model Representations},
+  year         = {2026},
+  doi          = {10.5281/zenodo.20938286},
+  url          = {https://github.com}
+}
+```
+
+

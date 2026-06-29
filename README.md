@@ -30,9 +30,7 @@ falsification attempts**, none of which overturned it.
 ```
 .
 ├── paper/
-│   ├── truth_axis_arxiv.tex     # the unified paper (arXiv submission)
 │   ├── truth_axis_arxiv.pdf
-│   ├── anatomy_note.tex         # follow-up working note (anatomy of the axis)
 │   └── anatomy_note.pdf
 ├── src/
 │   ├── truth_probe.py           # main reproduction script (positive results)

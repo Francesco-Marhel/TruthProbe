@@ -4,6 +4,10 @@ Unsupervised geometry of truth in small language models: a training-free
 truth axis, its knowledge-dependent dimensionality, and a cross-family
 anatomy of how the network builds and erodes it.
 
+Note for readers: If the built-in GitHub PDF viewer fails to load the previews or the download button hangs due to vector graphics complexity, you can download the full repository archive directly from Zenodo (Zenodo DOI
+10.5281/zenodo.20938285).
+
+
 ## Papers (in `paper/`)
 
 1. **How Much of Truth Fits on a Single Axis?** (`truth_axis_arxiv.pdf`) —

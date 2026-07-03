@@ -1,146 +1,74 @@
-# How Much of Truth Fits on a Single Axis?
+# TruthProbe
 
-### Knowledge-Dependent Dimensionality and Unsupervised Polarity Recovery in Large Language Model Representations
+Unsupervised geometry of truth in small language models: a training-free
+truth axis, its knowledge-dependent dimensionality, and a cross-family
+anatomy of how the network builds and erodes it.
 
-This repository contains the implementation, paper, and follow-up working note
-for an unsupervised geometric study of how factual truth is represented in a
-large language model (Qwen2.5-1.5B).
+## Papers (in `paper/`)
 
----
+1. **How Much of Truth Fits on a Single Axis?** (`truth_axis_arxiv.pdf`) —
+   an unsupervised SVD truth axis at cost O(d); held-out AUC up to 0.938
+   with permutation control; the axis-vs-probe gap scales with the model's
+   knowledge of the fact; unsupervised recovery of the polarity direction of
+   Bürger et al. at cosine 0.959; seven falsification attempts, none of
+   which overturns the one-dimensional reading.
+2. **Anatomy of the Truth Axis in Qwen2.5-1.5B** (`anatomy_note.pdf`) —
+   working note, chapter 1 of the anatomy: attention/FFN decomposition of
+   the residual stream, per-layer readability, the expanded-space negative,
+   and the first causal ablations.
+3. **The FFN Flip is Peak-Relative** (`ffn_flip_note.pdf`) — chapter 2,
+   closing the anatomy. On three models across two families (Qwen2.5-1.5B,
+   Qwen2.5-3B, Llama-3.2-1B) the FFN writes pro-truth into the truth peak
+   and flips to stable anti-truth at exactly peak+1, confirmed by
+   pre-registered prediction with permutation nulls. An exact SwiGLU split
+   attributes the erosion to the value stream, not the gate. Two competing
+   hypotheses are falsified by pre-registered criteria and reported as
+   results.
 
-## Core findings
+Superseded versions live in `drafts/`.
 
-1. **Unsupervised truth signal.** A geometric axis extracted via SVD of paired
-   true/false differences carries a real truth signal, reaching a held-out AUC of
-   up to 0.938 on clean minimal pairs (permutation p = 0.005).
-2. **Knowledge-dependent dimensionality.** The gap between the unsupervised axis
-   and a full linear probe scales with how well the model knows the fact:
-   ~0.05 on known facts, ~0.20 on unknown ones.
-3. **Unsupervised polarity recovery.** Unsupervised SVD on mixed-polarity data
-   recovers the supervised polarity direction of Bürger et al. at cosine 0.959,
-   without ever seeing polarity labels.
-
-The one-dimensional reading was stress-tested with **seven independent
-falsification attempts**, none of which overturned it.
-
----
-
-## Repository structure
-
-```
-.
-├── paper/
-│   ├── truth_axis_arxiv.pdf
-│   └── anatomy_note.pdf
-├── src/
-│   ├── truth_probe.py           # main reproduction script (positive results)
-│   ├── anatomy.py               # residual-stream decomposition (attn vs FFN)
-│   ├── anatomy_consolidate.py   # multi-seed stability of the decomposition
-│   ├── anatomy_expanded.py      # truth axis inside the FFN expanded space
-│   ├── ablation.py              # causal ablation of attention / FFN
-│   └── canvas.py                # visualization helper
-├── README.md
-└── LICENSE
-```
-
----
-
-## Requirements
+## Layout
 
 ```
-python >= 3.10
-torch
-transformers
-datasets
+paper/          current papers (PDF) + figures/
+drafts/         superseded working-note versions
+src/            all scripts, flat — they import each other; do not split
+                into subfolders or the imports (and the commands in
+                REPRODUCING.md) break
+README.md
+REPRODUCING.md  full reproduction commands for all three documents
+LICENSE         Apache 2.0 (code)
 ```
 
-Install:
+## Setup
 
 ```
 pip install torch transformers datasets
 ```
 
-Anatomy and ablation scripts load the model in float32 (the attention/FFN
-decomposition identity requires the precision); ~6 GB of VRAM is enough for
-Qwen2.5-1.5B.
+A CUDA GPU is optional; 12 GB is enough for every run (decomposition runs
+use float32 and spill to system RAM on the 3B models). Models load with
+safetensors only and `trust_remote_code=False`; external datasets load as
+Parquet only, at pinned revisions. `meta-llama/Llama-3.2-*` are gated:
+accept the license on Hugging Face and authenticate once with
+`hf auth login` (read token).
 
----
+## Reproducing
 
-## Reproducing the main results
-
-All commands are run from `src/`. The CounterFact dataset revision is pinned for
-exact reproducibility.
-
-**Positive results (the paper's main claims):**
-
-```
-python truth_probe.py signal
-python truth_probe.py polarity
-python truth_probe.py recovery
-```
-
-**Anatomy — where the truth axis is born (attention vs FFN), per layer:**
-
-```
-python anatomy.py --dataset builtin
-python anatomy.py --dataset counterfact --max-pairs 250 --perm 100 \
-    --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
-```
-
-**Anatomy — is the attn/FFN picture stable across seeds:**
-
-```
-python anatomy_consolidate.py --dataset counterfact --max-pairs 250 --seeds 5 \
-    --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
-```
-
-**Anatomy — truth axis inside the FFN expanded space (8960-dim):**
-
-```
-python anatomy_expanded.py --dataset counterfact --max-pairs 250 --perm 100 \
-    --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
-```
-
-**Causal ablation — is the dominant component necessary:**
-
-```
-# middle band (attention builds the signal)
-python ablation.py --dataset counterfact --max-pairs 250 \
-    --band-start 11 --band-end 15 --readout 15 \
-    --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
-
-# transition band (the FFN degrades it)
-python ablation.py --dataset counterfact --max-pairs 250 \
-    --band-start 16 --band-end 18 --readout 18 \
-    --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
-```
-
-Each anatomy/ablation tool embeds a self-check (decomposition identity,
-permutation null, or across-seed stability) that fails loudly on bad data, so the
-numbers it prints can be trusted only when that check passes.
-
----
-
-## The follow-up note
-
-`paper/anatomy_note.tex` documents an exploratory, mechanistic follow-up: how
-attention and the FFN build, carry, and erode the truth signal across layers.
-It is a **working note**, not a validated result to the standard of the main
-paper, and is labeled as such.
-
----
-
-## Citation
-
-If you use this work, please cite the archived release:
-
-> Vicidomini, Francesco Karim *How Much of Truth Fits on a Single Axis? Knowledge-Dependent
-> Dimensionality and Unsupervised Polarity Recovery in LLM Representations.*
-> Zenodo. DOI: 10.5281/zenodo.20938285
-
----
+Every number in the three documents is reproduced by one isolated command;
+the full list, organized per paper and per model, is in
+**[REPRODUCING.md](REPRODUCING.md)**. Every tool embeds its own shields —
+additive identity checks, held-out cross-validation over pairs, permutation
+nulls, multi-seed stability criteria — and prints its verdict: a run is
+certified by its in-code checks, not by its launch conditions.
 
 ## License
 
-- **Code** (`src/`): Apache-2.0 (see `LICENSE`).
-- **Paper and note** (`paper/`): CC BY 4.0.
+- **Code** (`src/`): Apache License 2.0 (see `LICENSE`).
+- **Papers, notes and figures** (`paper/`, `drafts/`): CC BY 4.0.
+
+## Citation
+
+If you use this work, please cite the papers (Zenodo DOI
+10.5281/zenodo.20938285 for paper 1; the note DOIs are listed in `paper/`
+once minted) and link this repository.

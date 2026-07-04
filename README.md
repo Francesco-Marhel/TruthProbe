@@ -8,7 +8,7 @@ Note for readers: If the built-in GitHub PDF viewer fails to load the previews o
 10.5281/zenodo.20938285).
 
 
-## Papers (in `paper/`)
+## Papers (in `Paper/`)
 
 1. **How Much of Truth Fits on a Single Axis?** (`truth_axis_arxiv.pdf`) —
    an unsupervised SVD truth axis at cost O(d); held-out AUC up to 0.938
@@ -20,7 +20,7 @@ Note for readers: If the built-in GitHub PDF viewer fails to load the previews o
    working note, chapter 1 of the anatomy: attention/FFN decomposition of
    the residual stream, per-layer readability, the expanded-space negative,
    and the first causal ablations.
-  3. **Attention Propagates, the FFN Overwrites** (`ffn_flip_note.pdf`, v2) —
+  3. **Attention Propagates, the FFN Overwrites** (`FFN_flip_v2.pdf`, v2) —
    chapter 2, closing the anatomy. An axis-provenance control generalized
    v1's peak-anchored flip into a relational law: the FFN's write at block b
    opposes every truth frame that does not contain it, while attention
@@ -36,7 +36,7 @@ Superseded versions live in `drafts/`.
 ## Layout
 
 ```
-paper/          current papers (PDF) + figures/
+Paper/          current papers (PDF) + figures/
 drafts/         superseded working-note versions
 src/            all scripts, flat — they import each other; do not split
                 into subfolders or the imports (and the commands in
@@ -71,10 +71,10 @@ certified by its in-code checks, not by its launch conditions.
 ## License
 
 - **Code** (`src/`): Apache License 2.0 (see `LICENSE`).
-- **Papers, notes and figures** (`paper/`, `drafts/`): CC BY 4.0.
+- **Papers, notes and figures** (`Paper/`, `drafts/`): CC BY 4.0.
 
 ## Citation
 
 If you use this work, please cite the papers (Zenodo DOI
-10.5281/zenodo.20938285 for paper 1; the note DOIs are listed in `paper/`
+10.5281/zenodo.20938285 for paper 1; the note DOIs are listed in `Paper/`
 once minted) and link this repository.

@@ -20,14 +20,16 @@ Note for readers: If the built-in GitHub PDF viewer fails to load the previews o
    working note, chapter 1 of the anatomy: attention/FFN decomposition of
    the residual stream, per-layer readability, the expanded-space negative,
    and the first causal ablations.
-3. **The FFN Flip is Peak-Relative** (`ffn_flip_note.pdf`) — chapter 2,
-   closing the anatomy. On three models across two families (Qwen2.5-1.5B,
-   Qwen2.5-3B, Llama-3.2-1B) the FFN writes pro-truth into the truth peak
-   and flips to stable anti-truth at exactly peak+1, confirmed by
-   pre-registered prediction with permutation nulls. An exact SwiGLU split
-   attributes the erosion to the value stream, not the gate. Two competing
-   hypotheses are falsified by pre-registered criteria and reported as
-   results.
+  3. **Attention Propagates, the FFN Overwrites** (`ffn_flip_note.pdf`, v2) —
+   chapter 2, closing the anatomy. An axis-provenance control generalized
+   v1's peak-anchored flip into a relational law: the FFN's write at block b
+   opposes every truth frame that does not contain it, while attention
+   propagates existing frames — near mirror images at the peak (+1.63 vs
+   −1.43 on Llama-3.2-3B). Confirmed by pre-registered prediction on four
+   models across two families (Qwen2.5-1.5B/3B, Llama-3.2-1B/3B). The
+   frame-free erosion, its causal value-stream attribution, and every v1
+   measurement stand; the dimensionality law gains a fourth point. v1's
+   peak-anchored interpretation is superseded (v1 in `drafts/`).
 
 Superseded versions live in `drafts/`.
 

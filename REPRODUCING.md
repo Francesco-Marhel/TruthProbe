@@ -183,40 +183,33 @@ python flip_consolidate.py --model meta-llama/Llama-3.2-1B \
 
 ### Note 2, version 2 — the axis-provenance control (relational law, 4 models)
 
-Requires `flip_consolidate.py` in the same folder (import dependency).
-Each model: one run for the FFN, one with `--component attn`. Outputs are
-matrices + diagonal summaries (no auto-verdict); the paper's Tables 2–3 are
-the POST and PRE diagonal summaries respectively.
+Requires `flip_consolidate.py` in the same folder (import dependency). Each
+model: one run for the FFN, one with `--component attn`. Outputs are matrices
++ diagonal summaries (no auto-verdict); the paper's Tables 2–3 are the POST
+and PRE diagonal summaries respectively. Commands are single-line
+(PowerShell-safe).
 
 ```
 python axis_provenance.py --peak 15 --scan-start 12 --scan-end 20
 python axis_provenance.py --peak 15 --scan-start 12 --scan-end 20 --component attn
-python axis_provenance.py --model Qwen/Qwen2.5-3B --peak 16 
---scan-start 13 --scan-end 21
-python axis_provenance.py --model Qwen/Qwen2.5-3B --peak 16 
---scan-start 13 --scan-end 21 --component attn
-python axis_provenance.py --model meta-llama/Llama-3.2-1B --peak 7 
---scan-start 3 --scan-end 13
-python axis_provenance.py --model meta-llama/Llama-3.2-1B --peak 7 
---scan-start 3 --scan-end 13 --component attn
-python axis_provenance.py --model meta-llama/Llama-3.2-3B --peak 9 
---scan-start 5 --scan-end 15
-python axis_provenance.py --model meta-llama/Llama-3.2-3B --peak 9 
---scan-start 5 --scan-end 15 --component attn
+python axis_provenance.py --model Qwen/Qwen2.5-3B --peak 16 --scan-start 13 --scan-end 21
+python axis_provenance.py --model Qwen/Qwen2.5-3B --peak 16 --scan-start 13 --scan-end 21 --component attn
+python axis_provenance.py --model meta-llama/Llama-3.2-1B --peak 7 --scan-start 3 --scan-end 13
+python axis_provenance.py --model meta-llama/Llama-3.2-1B --peak 7 --scan-start 3 --scan-end 13 --component attn
+python axis_provenance.py --model meta-llama/Llama-3.2-3B --peak 9 --scan-start 5 --scan-end 15
+python axis_provenance.py --model meta-llama/Llama-3.2-3B --peak 9 --scan-start 5 --scan-end 15 --component attn
 ```
 
 Fourth dimensionality point (behavior BEFORE geometry):
 
 ```
 python behav_check.py --model meta-llama/Llama-3.2-3B
-python truth_probe.py signal --dataset counterfact --max-pairs 250 
---model meta-llama/Llama-3.2-3B --baseline --perm 100 
---rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
+python truth_probe.py signal --dataset counterfact --max-pairs 250 --model meta-llama/Llama-3.2-3B --baseline --perm 100 --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
 ```
 
-### Figure 1 (peak-aligned collapse)
+### Figures
 
-The collapse figure is built from the `d'_ffn` columns of the three
-`contrib` / `flip_consolidate` tables above, aligned at each model's peak
-block (x = layer − peak) and, in the right panel, normalized by the flip
-amplitude |d'(peak+1)|.
+Fig. 1 of v2 (`provenance_asymmetry.png`): heatmaps of the PRE-ruler
+matrices (FFN above, attention below, four models) — built directly from
+the `axis_provenance.py` outputs above. The v1 peak-aligned collapse
+figure remains valid as the b = peak slice of these matrices.

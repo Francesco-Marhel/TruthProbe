@@ -200,6 +200,19 @@ python axis_provenance.py --model meta-llama/Llama-3.2-3B --peak 9 --scan-start 
 python axis_provenance.py --model meta-llama/Llama-3.2-3B --peak 9 --scan-start 5 --scan-end 15 --component attn
 ```
 
+### Note 3, SAE-Overlapping From FFN-flip
+
+Requires `Scripts categories.py`, `dictionary_export.py`, `arrangement_law.py` in src 
+in the same folder (import dependency).
+
+```
+python categories.py--model Qwen/Qwen2.5-3B--peak 16--write-layer 17--k-relations 8
+python categories.py--model meta-llama/Llama-3.2-3B--peak 9--write-layer 10--k-relations 8
+python arrangement_law.py
+# R5 + controls from the canonical matrices
+python dictionary_export.py--model Qwen/Qwen2.5-3B--peak 16--write-layer 17
+```
+
 Fourth dimensionality point (behavior BEFORE geometry):
 
 ```

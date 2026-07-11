@@ -1,0 +1,933 @@
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+\usepackage{float}
+
+\newtheorem{definition}{Definition}
+\newtheorem{law}{Empirical Law}
+
+\title{\textbf{Attention Propagates, the FFN Overwrites,\\ and the Axis Is a Mixture}\\[2pt]
+\large Relational Mechanics and Category Geometry of a Truth Direction\\
+Across Two Model Families}
+
+\author{Francesco Karim Vicidomini\\
+\small Independent researcher\\
+\small Reference code: \texttt{flip\_consolidate.py}, \texttt{axis\_provenance.py}, \texttt{ffn\_erosion.py}, \texttt{swiglu.py},\\
+\small \texttt{circuits.py}, \texttt{behav\_check.py}, \texttt{categories.py}, \texttt{arrangement\_law.py}, \texttt{dictionary\_export.py}}
+
+\date{July 2026\thanks{This document consolidates three working notes (``The FFN
+Flip is Peak-Relative'', July 3; ``Attention Propagates, the FFN Overwrites'',
+July 4; ``The Truth Axis is a Semantically Signed Mixture'', July 5) into a
+single manuscript. Every number in this document was regenerated under a
+single uniform protocol on July 9--10, 2026; where a regenerated value
+supersedes a published one, the change and its cause are stated in the text.
+The v1 to v2 correction of the flip interpretation is reported inside the
+document, as a result, in Section~\ref{sec:correction}. Companion paper:
+``How Much of Truth Fits on a Single Axis?'' (Zenodo DOI
+10.5281/zenodo.20938285), cited as~\cite{companion}.}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The companion paper~\cite{companion} measured how much of a language model's
+truth representation fits on a single training-free direction, and where that
+reading fails. This paper asks the two questions underneath: which component
+of the transformer makes the direction, and what is the direction made of? On
+four base models from two families (Qwen2.5, Llama-3.2), under held-out
+protocols with pre-registered predictions, we report three findings. First, a
+relational law: the feed-forward network's write at a block is anti-aligned
+with every truth frame that does not contain it, while attention is
+pro-aligned with frames it did not write; at the readability peak the two
+contributions are near mirror images. The law generalizes, and corrects, a
+peak-anchored claim of our own, whose circularity was exposed by a provenance
+control built against our own instrument; the correction is reported as a
+result. Second, the erosion of the truth signal after the peak survives every
+control and is causally attributed, on all four models, to the SwiGLU value
+stream rather than the gate. Third, the single axis is a semantically signed
+mixture: per-category truth axes form a structured arrangement that the model
+does not inherit from the lexical surface but constructs, and the two
+families converge on the same arrangement (Mantel $p = 0.0009$). A measured
+dictionary and a registered contract for any future sparse autoencoder close
+the series.
+\end{abstract}
+
+\section{Introduction}
+
+A training-free direction in the residual stream of a small language model
+carries a real, held-out, permutation-tested truth signal on facts the model
+knows; that signal is bounded by a full linear probe, and the gap between the
+two grows as the model's knowledge decreases and as the material becomes
+heterogeneous~\cite{companion}. Those are measurements about the axis as an
+object. This paper is about the axis as a process and as a composite: which
+architectural component builds it, which degrades it, by what mechanism, and
+what internal structure the single direction is summarizing.
+
+The paper proceeds in two movements. The first movement is mechanical.
+Starting from the causal finding of the companion paper (attention builds the
+signal in the middle layers, the FFN degrades it after the peak), the
+instrument is sharpened from per-band ablation to a per-layer, per-component,
+fixed-frame projection and followed across four models. The initial result,
+confirmed by pre-registered prediction, was simple: the FFN writes pro-truth
+into the peak block and flips to anti-truth at exactly the next block,
+wherever the peak sits. That result was then subjected to a control of our
+own construction, fitting the measuring frame at several blocks rather than
+only at the peak, and the control exposed a circularity in the simple
+reading. What replaced it is stronger: a fully relational law
+(Sec.~\ref{sec:law}) in which the FFN opposes every truth frame it did not
+help write and attention propagates every frame it did not write, with the
+peak-anchored flip as the special case where the frame is fitted at the peak.
+Section~\ref{sec:correction} narrates the failure and the generalization in
+full, because the sequence (claim, self-raised objection, exposure, stronger
+law) is scientific content rather than an embarrassment to be footnoted.
+
+The second movement is geometric. If the FFN writes truth in
+category-dependent directions, the single axis of the companion paper cannot
+be an atom; it must be a mixture. Grouping the data by Wikidata relation and
+fitting per-category truth axes, the mixture is measured directly: its signed
+geometry, its reorganization with depth, and, in a registered cross-family
+falsification, the convergence of its arrangement between the two families.
+The heterogeneity effect measured in the companion paper (the probe gap
+jumping from $0.062$ on homogeneous material to $0.203$ on a mix) is, in
+hindsight, this mixture seen from one direction.
+
+\paragraph{Contributions.}
+\begin{enumerate}
+\item The \emph{relational law} (pre-registered, four models, two families):
+FFN contributions anti-align with truth frames that do not contain them;
+attention contributions pro-align with frames they did not write; at the
+peak, under a clean pre-FFN frame, the two are near mirror images
+(Sec.~\ref{sec:law}).
+\item The \emph{axis-provenance control} that forced the law: a
+ruler-placement method with synthetic ground-truth validation, applied
+against our own published claim (Secs.~\ref{sec:provenance},
+\ref{sec:correction}).
+\item Causal attribution of the post-peak \emph{erosion} to the SwiGLU value
+stream on all four models, by an exact algebraic split and by causal
+freezes, with pre-registered predictions for the Llama family and the gate
+exonerated everywhere (Sec.~\ref{sec:erosion}).
+\item Two pre-registered discriminations with opposite outcomes: post-peak
+attention--FFN \emph{tug-of-war} is a trait of scale (present in both 3B
+models, absent in both smaller ones), while single-layer \emph{ignition} of
+the truth signal is a trait of the Qwen family
+(Sec.~\ref{sec:traits}).
+\item A pre-registered \emph{negative}, extended cross-family: the
+gauge-invariant OV/QK circuit crossover sits at a stable late relative depth
+on all four models and does not track the truth peak
+(Sec.~\ref{sec:negatives}).
+\item The \emph{category geometry}: per-category truth axes form a
+semantically signed arrangement that reorganizes with depth and converges
+across families, with the FFN's write directions decoding the category far
+above a lexical baseline (Sec.~\ref{sec:mixture}).
+\item A \emph{measured dictionary} and a four-criterion registered contract
+that any trained sparse autoencoder must beat to justify its cost
+(Sec.~\ref{sec:contract}).
+\end{enumerate}
+
+\section{Related work}
+
+\paragraph{Truth directions and their limits.} The companion
+paper~\cite{companion} defines the axis, the held-out protocol over pairs,
+the permutation null and its $p$-value estimator, and the know-rate; those
+definitions are reused here, not restated. B\"urger et
+al.~\cite{burger2024} establish the two-dimensional truth subspace and the
+polarity direction whose unsupervised recovery the companion paper reports.
+
+\paragraph{MLPs as key-value writers.} The memory-editing
+literature~\cite{meng2022} attributes to transformer MLPs the physiology of
+key-value stores whose writes deposit factual content into the residual
+stream. The relational law of Sec.~\ref{sec:law} is a dynamical face of that
+picture: the component that deposits the next frame's material is, per these
+measurements, the one that opposes the current frame.
+
+\paragraph{Rotational dynamics of factual selection.} A recent
+preprint~\cite{rotational2026} reports that factual constraint processing
+separates alternatives by rotation, with active suppression of the correct
+continuation at intermediate depth. The propagate/overwrite asymmetry
+supplies a candidate microscopic writer for that macroscopic observation.
+
+\paragraph{Attention-head specialization.} The head-taxonomy line of
+work~\cite{headgenome} motivated the pre-registered test of whether static,
+gauge-invariant circuit norms predict where truth lives (they do not,
+Sec.~\ref{sec:negatives}) and defines the per-head follow-up of
+Sec.~\ref{sec:leads}.
+
+\paragraph{Cross-model representation convergence.} The convergence of the
+category arrangement across families (Sec.~\ref{sec:mixture}) is a signed,
+truth-specific instance of the broader phenomenon that different models
+trained on the same world converge to similar
+representations~\cite{platonic2024}.
+
+\section{Scope and evidence levels}
+\label{sec:scope}
+
+Results are organized in three evidential levels and never mixed.
+\textbf{Level A}: replicated across models with predictions written before
+the runs. \textbf{Level B}: causal but on fewer models, or with multiple
+independent methods on one. \textbf{Level C}: leads, declared as such
+(Sec.~\ref{sec:leads}). Retractions and failed predictions are reported in
+the text at the point where they occur; the largest, the correction of our
+own flip interpretation, has its own section (\ref{sec:correction}).
+
+\section{Setup}
+\label{sec:setup}
+
+Four base (non-instruct) models across two families:
+
+\begin{table}[H]
+\centering
+\caption{Models. The truth peak $p$ is the block whose intact residual
+maximizes held-out truth AUC (protocol of~\cite{companion}); ``block $b$''
+denotes the output of transformer block $b$. Know-rate: fraction of $200$
+CounterFact prompts whose true target the model reproduces under greedy
+decoding (seed $0$), measured before any geometry. Axis and probe AUC:
+CounterFact, $250$ pairs, held-out; gap $=$ probe $-$ axis.}
+\label{tab:models}
+\begin{tabular}{lccccccc}
+\toprule
+model & blocks & $d_{\mathrm{model}}$ & peak $p$ & know-rate & axis & probe & gap \\
+\midrule
+Qwen2.5-1.5B  & $28$ & $1536$ & $15$ & $30.0\%$ ($61/200$) & $0.792$ & $0.854$ & $0.062$ \\
+Qwen2.5-3B    & $36$ & $2048$ & $16$ & $37.0\%$ ($74/200$) & $0.832$ & $0.881$ & $0.049$ \\
+Llama-3.2-1B  & $16$ & $2048$ & $7$  & $35.5\%$ ($71/200$) & $0.690$ & $0.831$ & $0.141$ \\
+Llama-3.2-3B  & $28$ & $3072$ & $9$  & $41.0\%$ ($82/200$) & $0.785$ & $0.897$ & $0.112$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two regularities and one boundary, extending the dimensionality claim
+of~\cite{companion}: within each family the gap decreases as the know-rate
+increases; across families a family-level offset remains, with Qwen
+concentrating more of the truth signal on the single axis at comparable
+knowledge. An earlier version of this table imported the Qwen2.5-1.5B row
+from the companion paper's mixed-dataset column while the other rows were
+measured on CounterFact alone, a protocol inhomogeneity caught by
+re-measurement; all rows above come from one command under one protocol,
+and the earlier slogan that the gap ``tracks knowledge every time'' is
+retired in favor of the two-part statement.
+
+Dataset: \texttt{NeelNanda/counterfact-tracing} (pinned revision
+\texttt{c945b08\ldots}, loaded as Parquet only), $250$ minimal pairs unless
+stated. Decomposition runs use \texttt{float32} and are gated by the
+additive identity check of~\cite{companion} (median relative errors
+$0.65$--$1.23 \times 10^{-7}$ across the runs of this paper);
+extraction-only runs use \texttt{bfloat16}. The spread of the four peaks in
+relative depth ($0.32$--$0.54$) already anticipates the negative of
+Sec.~\ref{sec:negatives}: no fixed depth, absolute or relative, locates
+truth.
+
+\section{Methods}
+\label{sec:methods}
+
+\subsection{Frames and the fixed-frame contribution statistic}
+\label{sec:fixedaxis}
+
+Within a block the residual stream updates additively,
+$h_{b+1} = h_b + a_b + f_b$, with $a_b$ the attention contribution and $f_b$
+the FFN contribution, captured by forward hooks~\cite{companion}.
+
+\begin{definition}[Truth frame]
+The \emph{post frame} $F_b^{\mathrm{post}}$ is the oriented truth axis $v_1$
+fit (on training folds only, true side positive) on the block output
+$h_{b+1} = h_b + a_b + f_b$; it contains $f_b$ and $a_b$. The \emph{pre
+frame} $F_b^{\mathrm{pre}}$ is the same construction on the pre-FFN state
+$h_b + a_b$; it contains $a_b$ but excludes $f_b$. A frame \emph{exists} at
+$b$ when the axis fit there clears its permutation null held-out.
+\end{definition}
+
+The statistic for a contribution $c$ at layer $L$ measured against a frame
+$F$ with axis $v_1$ is the held-out class gap and its effect size,
+\begin{equation}
+\mathrm{gap}(c; F) \;=\; \overline{(v_1 \cdot c)}\big|_{\mathrm{true}}
+- \overline{(v_1 \cdot c)}\big|_{\mathrm{false}},
+\qquad
+d'(c; F) \;=\; \frac{\mathrm{gap}(c; F)}{\text{pooled std}},
+\end{equation}
+with the pooled standard deviation over the held-out projections of both
+classes. A negative FFN gap means the FFN literally writes toward the false
+side of the frame. Stability criterion, fixed in code before the
+consolidation runs: a value is \emph{stable} if its magnitude exceeds both
+$2\sigma$ across $5$ cross-validation seeds and a floor of $0.03$.
+
+\subsection{The exact SwiGLU split}
+\label{sec:swiglu}
+
+The FFN computes $f = W_{\mathrm{down}}(g \odot u)$ with
+$g = \mathrm{silu}(W_{\mathrm{gate}} x)$, $u = W_{\mathrm{up}} x$. The
+projection of $f$ on $v_1$ is $w \cdot (g \odot u)$ with
+$w = W_{\mathrm{down}}^{\top} v_1$, the residual axis pulled back through
+the down-projection; no axis is ever fit in the expanded space, avoiding the
+$p \gg n$ regime (more dimensions than samples) entirely. With the symmetric
+intra-pair split ($\Delta g = g_t - g_f$, $\bar g = (g_t + g_f)/2$, likewise
+for $u$) the mixed term cancels and the identity is exact:
+\begin{equation}
+w \cdot (g_t \odot u_t - g_f \odot u_f)
+= \underbrace{w \cdot (\Delta g \odot \bar u)}_{\text{gate term}}
++ \underbrace{w \cdot (\bar g \odot \Delta u)}_{\text{value term}}.
+\label{eq:split}
+\end{equation}
+Verified numerically at $7.4 \times 10^{-8}$ relative error on real data.
+
+\subsection{Interventions}
+\label{sec:interventions}
+
+Beyond zero-ablation of a component over a band of layers (peak$+1$ to
+peak$+3$, readout at band end, on every model), two refinements. (i) A
+\emph{frozen control} obtained for free: with both components zeroed over
+the band, the readout state is identically the band-entry state, so the
+frozen reference is read off the intact pass. (ii) \emph{Gate-freeze and
+value-freeze}: at the reading position, $g$ (respectively $u$) is replaced
+by its intra-pair mean cached from the intact run, killing the class-driven
+variation of one stream while the FFN stays on.
+
+\subsection{Static circuit norms}
+\label{sec:circuits}
+
+Per attention head (GQA-aware), the gauge-invariant circuit norms
+$\lVert W_q^{\top} W_k \rVert_F$ (routing) and $\lVert W_o W_v \rVert_F$
+(writing)~\cite{elhage2021}. Individual weight norms are gauge-dependent
+($W_q \to \alpha W_q$, $W_k \to W_k / \alpha$ leaves the function
+unchanged); the products are not. A gauge self-test gates the computation.
+The \emph{crossover} is the first layer from which the median-normalized
+OV/QK ratio stays above $1$ for at least three consecutive layers, a
+criterion fixed in code before any run.
+
+\subsection{The axis-provenance control}
+\label{sec:provenance}
+
+The objection this method answers, raised by the author against the
+author's own instrument, is that a result anchored to ``the block where the
+ruler was fit, plus one'' could be a property of the ruler rather than of
+the FFN. The control: fit frames at several blocks
+$b \in \{p{-}4, p{-}2, p, p{+}2\}$, both post and pre, and recompute the
+full $d'$ profile of each component under each frame. The discrimination
+criterion was fixed before the runs and validated on synthetic ground
+truth: a planted global axis with a planted writer flip stays pinned under
+every frame; a planted circular writer collapses under the pre frame
+(collapse ratio $0.04$) while planted genuine alignment survives ($0.99$).
+The released tools print full matrices with no automatic verdict; the
+reason is a repeated methodological lesson recorded in
+Sec.~\ref{sec:negatives}.
+
+\subsection{Per-category axes, transfer, decoding, and the Mantel statistic}
+\label{sec:catmethods}
+
+CounterFact is grouped by Wikidata relation; the top-$K$ relations by
+unique pairs are used ($K{=}8$ for the registered falsification, $60$ pairs
+each): P103 mother tongue, P1412 languages spoken, P176 manufacturer, P27
+citizenship, P30 continent, P37 official language, P413 sport position,
+P495 country of origin. Per-category truth axes are fit at the peak block,
+each oriented within its own category, so the sign of a cross-category
+cosine is information: negative means the shared direction reads the other
+category's truth backwards. Four measurements: (i) signed cosine matrices
+at the peak and at an early block (block $2$, the lexical surface control);
+(ii) the held-out \emph{transfer matrix}, cell $(i,j)$ being the held-out
+AUC of category $i$'s axis on category $j$'s pairs; (iii) nearest-centroid
+\emph{decoding} of the category from the FFN's class-signed write direction
+$\Delta f$ at peak$+1$, against the same decoder on early residual
+differences (the lexical baseline); (iv) the \emph{Mantel test}, a
+permutation test for the correlation between two distance matrices, here
+applied under category-label permutation to compare the two families'
+signed-cosine arrangements.
+
+\section{First movement: the flip, its correction, and the relational law}
+\label{sec:flip}
+
+\subsection{The peak-relative flip (the measurement that survives)}
+
+For each model the prediction was written before the run: under the
+peak-fit post frame, the FFN's gap is pro-truth at the peak block $p$ and
+flips to stable anti-truth at $p{+}1$.
+
+\begin{table}[H]
+\centering
+\caption{The flip at peak$+1$ under the peak-fit post frame. CounterFact
+$250$ pairs, $5$ seeds, permutation null with $100$ within-pair swaps
+($\hat p = 0.0099$ on every row). All four rows from the uniform July 10
+consolidation; the Qwen2.5-1.5B row supersedes the earlier single-seed scan
+($+0.728$/$-0.692$), with which it agrees to the second decimal.}
+\label{tab:flip}
+\begin{tabular}{lcccc}
+\toprule
+model & $\mathrm{gap}_{\mathrm{ffn}}(p)$ & $\mathrm{gap}_{\mathrm{ffn}}(p{+}1)$ & $d'(p)$ & $d'(p{+}1)$ \\
+\midrule
+Qwen2.5-1.5B & $+0.730 \pm 0.002$ & $-0.691 \pm 0.002$ & $+0.58$ & $-0.82$ \\
+Qwen2.5-3B   & $+0.575 \pm 0.005$ & $-0.926 \pm 0.002$ & $+0.68$ & $-1.25$ \\
+Llama-3.2-1B & $+0.092 \pm 0.001$ & $-0.111 \pm 0.001$ & $+0.54$ & $-0.94$ \\
+Llama-3.2-3B & $+0.087 \pm 0.001$ & $-0.167 \pm 0.001$ & $+0.49$ & $-1.26$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The four peaks sit at different absolute and relative depths
+(Table~\ref{tab:models}); the flip sits at peak$+1$ in all four. Aligned in
+peak-relative coordinates and normalized by the flip amplitude, the
+per-layer profiles collapse onto a common shape: rise into the peak, spike
+at $+1$, decay toward zero (Fig.~\ref{fig:collapse}). The measurement is
+correct and reproduces; its interpretation, that the flip is anchored to
+the peak, is what the next subsection tests.
+
+\subsection{The correction: the control bites its owner}
+\label{sec:correction}
+
+Under frames fit at $p{-}4$, $p{-}2$, $p$, $p{+}2$
+(Sec.~\ref{sec:provenance}), the transition does not stay at $p{+}1$: it
+tracks the frame. On every model the post-frame diagonal reads pro at $b$
+and anti at $b{+}1$ for every $b$ where a frame exists
+(Table~\ref{tab:post}). The peak-anchored flip was the $b{=}p$ slice of a
+relational pattern present at every such block. An accidental replication
+is worth recording: a consolidation run launched with a wrong default
+re-measured Qwen2.5-3B with the frame at block $15$, off its peak, and
+returned the same pro/anti pair at $15/16$ ($+0.541$/$-0.545$, $5$ seeds,
+$\hat p = 0.0099$); the accident confirms the law at a frame no one chose.
+
+\begin{table}[H]
+\centering
+\caption{Post-frame diagonals: per fit block $b$, the FFN's held-out $d'$
+at $b$ and at $b{+}1$. Pro at $b$, anti at $b{+}1$, wherever a frame
+exists.}
+\label{tab:post}
+\begin{tabular}{lccc}
+\toprule
+model (peak) & frame $b$ & $d'_{\mathrm{ffn}}(b)$ & $d'_{\mathrm{ffn}}(b{+}1)$ \\
+\midrule
+Qwen2.5-1.5B ($15$) & $13$ / $15$ / $17$ & $+0.61$ / $+0.57$ / $+0.52$ & $-0.79$ / $-0.82$ / $-0.73$ \\
+Qwen2.5-3B ($16$)   & $14$ / $16$ / $18$ & $+0.06$ / $+0.69$ / $+0.73$ & $-0.09$ / $-1.23$ / $-0.79$ \\
+Llama-3.2-1B ($7$)  & $5$ / $7$ / $9$    & $+0.13$ / $+0.54$ / $+0.19$ & $-0.07$ / $-0.95$ / $-0.54$ \\
+Llama-3.2-3B ($9$)  & $7$ / $9$ / $11$   & $+0.37$ / $+0.49$ / $+0.57$ & $-0.42$ / $-1.25$ / $-1.39$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Under the pre frame the FFN's ``pro at own block'' term does not merely
+shrink; it inverts sign (Table~\ref{tab:pre}). Measured against the frame
+that exists at the moment it writes, the FFN is strongly anti-aligned. The
+pro term of the post frame was, in substantial part, the frame measuring
+its own ingredient: $f_b$ is inside $h_{b+1}$ and drags the axis fit there
+toward itself. Where the axis is weak or absent, the pattern correctly
+vanishes: frames fit before the Qwen-3B ignition (fit-block cosines to the
+peak axis $0.049$ and $0.079$) and before the Llama-1B peak return noise.
+What the failure bought: a general law instead of a special case, and a
+live demonstration that the safeguards bind their owner.
+
+\subsection{The relational law}
+\label{sec:law}
+
+\begin{table}[H]
+\centering
+\caption{Pre-frame diagonals: the same cells with $f_b$ excluded from the
+frame's data. The FFN inverts sign; attention, measured identically, is the
+mirror image.}
+\label{tab:pre}
+\begin{tabular}{lccc}
+\toprule
+model & frame $b$ & $d'_{\mathrm{ffn}}(b)$ & $d'_{\mathrm{attn}}(b)$ \\
+\midrule
+Qwen2.5-1.5B & $13$ / $15$ / $17$ & $-0.63$ / $-0.41$ / $-0.78$ & $+1.56$ / $+1.31$ / $+1.04$ \\
+Qwen2.5-3B   & $14$ / $16$ / $18$ & $-0.14$ / $-1.16$ / $-0.46$ & $+0.26$ / $+1.38$ / $+1.40$ \\
+Llama-3.2-1B & $7$ / $9$          & $-1.17$ / $-0.82$           & $+1.26$ / $+0.82$ \\
+Llama-3.2-3B & $7$ / $9$ / $11$   & $-0.81$ / $-1.43$ / $-1.41$ & $+0.99$ / $+1.63$ / $+1.75$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The decisive zone is the sub-diagonal of the pre matrices: contributions at
+layer $L$ measured against frames of blocks strictly before $L$, which
+contain neither $f_L$ nor $a_L$ and are clean of every containment effect.
+There (Fig.~\ref{fig:asymmetry}) the FFN is negative and attention positive
+nearly everywhere a frame exists, on all four models. At the peak, under
+the same clean frame, the two components are near mirror images:
+$+1.31/-0.41$ (Qwen-1.5B), $+1.38/-1.16$ (Qwen-3B), $+1.26/-1.17$
+(Llama-1B), $+1.63/-1.43$ (Llama-3B). Pre-registered predictions for the
+two Llamas, written before those runs, were all confirmed. The regularity
+can be stated compactly.
+
+\begin{law}[Propagate vs.\ overwrite]
+\label{law:relational}
+Let $F$ be a truth frame that exists at block $b$, and let $L \geq b$ be a
+layer whose contributions are not contained in $F$ (any $L$ for pre frames
+at $b = L$; any $L > b$ for both frame types). Then, as an empirical
+regularity across the four models studied: $d'(f_L; F) < 0$ and
+$d'(a_L; F) > 0$ wherever both are stable. Attention propagates frames it
+did not write; the FFN opposes them and deposits the material of later
+frames.
+\end{law}
+
+The law dissolves the earlier implicit picture of an axis being eroded like
+an object: the axis is not an object in the model but a moving statistical
+summary of where the class difference lives, and the FFN's class-signed
+writes are what successive frames are made of. This is the dynamical face
+of the key-value write-head physiology attributed to
+MLPs~\cite{meng2022}, and a candidate microscopic writer for the
+macroscopic finding of~\cite{rotational2026}.
+
+\begin{figure}[t]
+\centering
+% Upload flip_collapse.png alongside the .tex.
+\includegraphics[width=0.9\textwidth]{flip_collapse.png}
+\caption{The FFN's frame writing ($d'$) across depth, aligned at the truth
+peak, four models. Right: normalized by the flip amplitude.}
+\label{fig:collapse}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+% Upload provenance_asymmetry.png alongside the .tex.
+\includegraphics[width=0.95\textwidth]{provenance_asymmetry.png}
+\caption{Propagate vs.\ overwrite on four models: held-out $d'$ of each
+component's contribution (FFN above, attention below) against pre frames
+fit at four blocks. The FFN row is cold wherever a frame exists; the
+attention row is warm.}
+\label{fig:asymmetry}
+\end{figure}
+
+\section{The erosion: real, frame-free, and carried by the value stream on four models}
+\label{sec:erosion}
+
+The correction separates two phenomena the peak-anchored reading conflated:
+frame-relative rotation (what the flip was) and frame-free decay of class
+signal after the peak (the genuine erosion). The erosion stands on
+measurements that use no frozen frame, now on all four models
+(Table~\ref{tab:ablate}); the predictions for the Llama rows were
+registered before those runs and confirmed. This section is Level A.
+
+\begin{table}[H]
+\centering
+\caption{Causal ablation over the band peak$+1$ to peak$+3$, readout at
+band end; held-out refit truth AUC. FFN-off restores signal on every model;
+attention-off is neutral on the smaller models and destructive on both 3B
+models (the tug-of-war of Sec.~\ref{sec:traits}).}
+\label{tab:ablate}
+\begin{tabular}{lcccc}
+\toprule
+model & intact & FFN-off & attn-off & frozen \\
+\midrule
+Qwen2.5-1.5B & $0.712$ & $0.815$ & $0.708$ & $0.793$ \\
+Qwen2.5-3B   & $0.793$ & $0.846$ & $0.738$ & $0.831$ \\
+Llama-3.2-1B & $0.551$ & $0.744$ & $0.531$ & $0.691$ \\
+Llama-3.2-3B & $0.740$ & $0.847$ & $0.593$ & $0.785$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Inside the SwiGLU, four models. Left: the exact split of
+Eq.~\ref{eq:split} at the flip layer (peak-fit frame). Right: causal
+freezes over the band (AUC recovery vs.\ intact). The anti-truth write and
+its causal carrier are the value stream everywhere; the gate is neutral or
+mildly pro-truth.}
+\label{tab:swiglu}
+\begin{tabular}{lccccc}
+\toprule
+ & \multicolumn{3}{c}{split at flip} & \multicolumn{2}{c}{freeze recovery} \\
+model & gate & value & total & gate & value \\
+\midrule
+Qwen2.5-1.5B & $+0.041$ & $-0.734$ & $-0.692$ & $+0.040$ & $+0.089$ \\
+Qwen2.5-3B   & $-0.120$ & $-0.806$ & $-0.926$ & $+0.008$ & $+0.064$ \\
+Llama-3.2-1B & $+0.016$ & $-0.127$ & $-0.110$ & $+0.028$ & $+0.123$ \\
+Llama-3.2-3B & $+0.021$ & $-0.186$ & $-0.166$ & $+0.056$ & $+0.122$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Three annotations keep the table honest. First, the earlier hypothesis that
+the gate carries the erosion (which neurons open switching the stream
+toward next-token context) is falsified in the same direction on every
+model; at the peak, by contrast, the split shows the gate carrying about
+two thirds of the pro-truth construction (Qwen-1.5B: gate $+0.486$, value
+$+0.242$). Second, on Llama-3.2-3B the value-freeze lands at $0.862$, above
+the frozen reference $0.785$: with the value stream's class variation
+silenced, the band's attention adds signal, which is the tug-of-war of the
+next section seen causally. Third, the earlier lead ``FFN-off beats
+frozen'', demoted to noise on the Qwen models ($+0.022$/$+0.015$, both
+under the stability floor), resurfaces above the floor on both Llamas
+($+0.052$/$+0.062$); the demotion was correct for Qwen, and the effect is
+recorded as family-dependent, without a dedicated null, hence an
+observation and not a claim. A frame-free rotation check closes the
+projection-artifact objection on three models: the cosine of the mean FFN
+pair-difference with $v_1$ jumps sign in a single step at peak$+1$ with the
+write magnitude intact (deltas $-0.741$, $-0.654$, $-0.632$ on Qwen-1.5B,
+Qwen-3B, Llama-1B), where genuine rotation predicts a smooth multi-layer
+sweep.
+
+\section{Two traits, discriminated: tug-of-war is scale, ignition is family}
+\label{sec:traits}
+
+Two pre-registered discriminations with opposite outcomes, which together
+show that scale and training recipe leave distinct, measurable signatures.
+
+\paragraph{Tug-of-war is a trait of scale.} In the erosion band, removing
+attention is neutral on the two smaller models (refit change $-0.004$ on
+Qwen-1.5B, $-0.020$ on Llama-1B, both under the floor) and destructive on
+both 3B models ($-0.055$ on Qwen-3B, $-0.147$ on Llama-3B). The registered
+discrimination read: present on Llama-3B and absent on Llama-1B implies
+scale; absent on both implies a Qwen-family trait. Outcome: scale. In the
+larger models the post-peak band is a tug-of-war in which attention still
+writes pro-truth while the FFN's value stream overwrites, not a passive
+decline.
+
+\paragraph{Ignition is a trait of the Qwen family.} The Qwen-3B per-layer
+AUC curve switches on in a single layer ($0.526 \to 0.790$), driven by a
+coordinated two-layer construction burst; the Qwen-1.5B curve is a smooth
+ramp. The registered discrimination: scale predicts a step in Llama-3.2-3B;
+family predicts a ramp. Measured: a ramp ($0.526 \to 0.657 \to 0.664 \to
+0.749 \to 0.785$ across levels $6$--$10$). Ignition is, on present
+evidence, a trait of the Qwen recipe at the 3B scale, not of scale itself.
+
+\section{A pre-registered negative, cross-family: the static crossover does not track the peak}
+\label{sec:negatives}
+
+Motivated by an external observation that value-to-query weight norms scale
+with depth~\cite{headgenome}, the gauge-invariant version was tested: does
+the layer where the writing circuit overtakes the routing circuit predict
+the truth peak? The prediction for the Llama models, registered before
+their runs, was that it does not. Outcome (Table~\ref{tab:crossover}): the
+crossover sits at a stable late relative depth on all four models
+($0.61$--$0.75$) while the peak wanders ($0.32$--$0.54$); the two coincide
+only on Qwen2.5-1.5B, the accident that spawned the hypothesis the first
+working note falsified across scale. The depth-scaling of the circuits may
+be real and general; it is not where truth lives. The late-layer OV
+explosion (Qwen-1.5B sums $338.9$/$322.0$ at layers $26$--$27$) instead
+matches the decoupling of Sec.~\ref{sec:leads}.
+
+\begin{table}[H]
+\centering
+\caption{The OV/QK crossover (first layer sustaining ratio $>1$ for three
+consecutive layers) against the truth landmarks, four models. Distance is
+to the nearer of peak and flip.}
+\label{tab:crossover}
+\begin{tabular}{lcccc}
+\toprule
+model & crossover & peak / flip & distance & rel.\ depth (cross vs.\ peak) \\
+\midrule
+Qwen2.5-1.5B & $17$ & $15$ / $16$ & $1$ & $0.61$ vs.\ $0.54$ \\
+Qwen2.5-3B   & $24$ & $16$ / $17$ & $7$ & $0.67$ vs.\ $0.44$ \\
+Llama-3.2-1B & $12$ & $7$ / $8$   & $4$ & $0.75$ vs.\ $0.44$ \\
+Llama-3.2-3B & $17$ & $9$ / $10$  & $7$ & $0.61$ vs.\ $0.32$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{A methodological note on automatic verdicts.} During the
+regeneration of this table, the circuit tool's hardcoded landmark
+annotations (written for one model) mislabeled the truth peak on the other
+three and printed a spurious coincidence verdict for Llama-3.2-3B. It was
+the third automatic verdict to misread its own numbers in this project's
+history, after two in the provenance tooling. All released tools now print
+matrices and distances with no verdict prose; the reading belongs to the
+researcher. The raw norm tables, which depend only on the weights, were
+unaffected.
+
+\section{Second movement: the axis is a semantically signed mixture}
+\label{sec:mixture}
+
+If the FFN writes truth along directions that depend on what kind of fact
+is being written, the single axis is a mixture, and its ingredients can be
+measured. Design and statistics as in Sec.~\ref{sec:catmethods}; the
+registered falsification runs on the two 3B models. Llama-3.2-1B is
+excluded from this section by a scoping rule stated in advance: it is the
+weakest-axis model of the four (axis AUC $0.690$), and per-category axes
+fit on $60$ pairs there risk reporting noise as geometry.
+
+\paragraph{The signed geometry.} At the peak, the language-relation block
+coheres (Qwen-3B cosines $+0.27$ to $+0.76$; Llama-3B $+0.55$ to $+0.69$),
+continent anti-aligns with that block (Qwen $-0.07$ to $-0.20$; Llama
+$-0.09$ to $-0.15$), sport-position is near-orthogonal to everything, and
+country-of-origin sides with the block (strongly on Llama, $+0.51$ to
+$+0.75$). The anti-alignment is confirmed by an independent statistic:
+transfer from the continent axis into the language block falls below
+chance (Llama: AUC $0.198$--$0.33$); on Qwen the below-chance transfer is
+bidirectional, on Llama one-directional, a partial replication reported as
+such. Within-category transfer exceeds cross-category transfer on both
+models (Qwen $0.662$ vs.\ $0.596$; Llama $0.898$ vs.\ $0.808$), which also
+bears on the topic-generalization question raised for the companion
+paper's protocol.
+
+\paragraph{The reorganization with depth.} The early-block matrices are
+not flat: they carry shared corpus statistics (the two families' early
+matrices correlate at $r = +0.934$). Depth does not create arrangement from
+nothing; it re-files it. Citizenship sides with geography at the embedding
+level and with the language block at the peak, on both families. The
+extreme case: the axes of languages-spoken and official-language start near
+anti-parallel ($\cos = -0.90$ Qwen, $-0.86$ Llama, presumably a lexical
+opposition in how the two templates use language tokens) and merge at the
+peak ($+0.76$, $+0.62$). Within each model, the early and peak
+arrangements are uncorrelated or anti-correlated ($r = -0.547$ Qwen,
+$-0.175$ Llama): the peak structure contradicts, rather than inherits, the
+lexical surface.
+
+\paragraph{The FFN writes truth along category-dependent directions.}
+Decoding the relation from the unit write direction $\Delta f$ at
+peak$+1$: $74.17\%$ (Qwen-3B) and $81.67\%$ (Llama-3B) against chance
+$12.5\%$ and permutation null $95$th percentiles near $15.5\%$
+($\hat p = 0.0099$ both); lexical baseline $39.17\%$ and $42.08\%$. Read
+together with Law~\ref{law:relational}: the component that overwrites truth
+frames does so along category-dependent directions. The mixture is not
+only in the representation but in the writing.
+
+\paragraph{The registered falsification and its verdict.} Five predictions
+were written before any Llama measurement of this geometry; outcomes in
+full, partials included. \textbf{R1} (language block on Llama, cosines in
+$[+0.15, +0.45]$): structure confirmed, magnitude outside the registered
+window on the high side. \textbf{R2} (continent anti-aligned, below-chance
+transfer both directions): signs confirmed; bidirectionality held only on
+Qwen. \textbf{R3} ($\Delta f$ decoding at least $10$ points over lexical):
+confirmed with a margin near $40$ points. \textbf{R4} (the citizenship
+early-to-peak switch replicates): confirmed, plus the stronger merge.
+\textbf{R5} (the arrangement law): confirmed; off-diagonal peak matrices,
+Qwen-3B vs.\ Llama-3B, Pearson $r = +0.770$ (Spearman $+0.893$), Mantel
+null $95$th percentile $+0.498$, $p = 0.0009$; robust to excluding the
+anomalous relation P176 ($r = +0.808$, $p = 0.0037$).
+
+\paragraph{The arrangement law.} Combined with the within-model
+reorganization, the reading is: the two families share a lexical starting
+arrangement, abandon it, and converge on the same functional arrangement.
+Same start, same move, same destination, different machines. The
+arrangement of the truth mixture is a property of the knowledge domain, not
+of the training recipe: a signed, truth-specific instance of cross-model
+representation convergence~\cite{platonic2024}. In hindsight this section
+also explains a companion-paper measurement from the other side: forcing
+one axis onto heterogeneous material costs $0.203$ of held-out AUC against
+a full probe, versus $0.062$ on homogeneous material~\cite{companion},
+because the single axis is being asked to summarize a signed mixture with
+one number.
+
+\paragraph{Anomaly, declared.} On Llama-3B, relation P176 (manufacturer)
+shows within-CV and incoming transfer of $1.000$ from every axis:
+universal perfect separability, which suggests surface structure in that
+relation's pairs rather than truth geometry. It is excluded in the R5
+robustness check (which holds) and flagged for inspection before any claim
+rests on it.
+
+\begin{figure}[t]
+\centering
+% Upload categories_geometry.png alongside the .tex.
+\includegraphics[width=0.95\textwidth]{categories_geometry.png}
+\caption{The category geometry: early vs.\ peak signed-cosine matrices,
+and decoding vs.\ the lexical baseline.}
+\label{fig:catgeom}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+% Upload arrangement_law.png alongside the .tex.
+\includegraphics[width=0.95\textwidth]{arrangement_law.png}
+\caption{The arrangement law (R5). Left: the two $K{=}8$ peak
+signed-cosine matrices. Center: their off-diagonal cells against each
+other. Right: cross-model agreement at the peak and at the embedding
+level, and the within-model reorganization between them.}
+\label{fig:law}
+\end{figure}
+
+\section{The measured dictionary and the sparse contract}
+\label{sec:contract}
+
+\texttt{dictionary\_export.py} saves, per model, the measured dictionary:
+the per-category oriented axes, the global axis, and the FFN write
+centroids, with signed matrices and full metadata in one loadable file (a
+$[K \times d]$ bundle of tens of kilobytes): a $K$-direction truth and
+category monitor whose baseline performance is quantified above. The
+sparse autoencoder that this series hands to engineering is justified only
+if, against matched nulls, it (1) aligns with the per-category axes, (2)
+respects the semantic geography, (3) reproduces the signs, including the
+inverted loading on continent and the depth reorganization, and (4) beats
+the measured dictionary on class-signal reconstruction and category
+decoding. Either outcome is content.
+
+\section{Leads, declared as leads}
+\label{sec:leads}
+
+\paragraph{A second readable dimension in the mid-knowledge regime.} On
+Llama-3.2-1B at the peak, a held-out logistic on $(\mathrm{Re},
+\mathrm{Im})$ reaches $0.783$ vs.\ $0.690$ for the single axis; on
+Llama-3.2-3B phase scores match or beat the axis in the decay zone. In the
+Qwen models the second dimension never added more than $+0.02$. Read
+through the dimensionality relation, this is the expected geometric
+signature of the mid-knowledge regime: as knowledge decreases, off-axis
+components become readable. It refines, and does not contradict, the
+one-dimensionality claim of~\cite{companion}, which was always scoped to
+known facts. No dedicated null on the margin yet.
+
+\paragraph{Per-head anatomy.} The attention contribution is a sum of heads
+through the output projection, and the fixed-frame instrument applies
+unchanged to each head's slice. Whether the pro-truth propagation at the
+peak, and the 3B tug-of-war, are carried by a few identifiable heads or
+distributed across the pack connects this anatomy
+to~\cite{headgenome}.
+
+\paragraph{Framing bias with an open lexical confound.} A $2{\times}2$
+moral/prudential design on Qwen2.5-1.5B: framing does not rotate the axis
+(transfer $0.979$--$0.99$), but there is a large level bias among
+equally-true statements ($-2.75\sigma$ at layer $11$), and the SVD of
+mixed-framing pairs recovers a framing direction at $|\cos| = 0.912$ in
+PC2, the companion paper's recovery structure on a new factor. The
+confound: the bias is already $-2.86\sigma$ at layer $1$, which points to
+the lexical surface; crossed templates are required before this is more
+than a lead.
+
+\paragraph{Late-layer decoupling.} In all inspected models the total
+volume written by the FFN grows toward the output while its projection on
+the truth frame goes to zero and the intact truth AUC decays toward
+chance. The terminal regime is a decoupling: the model writes enormously,
+and none of it speaks of truth. Terminal sign changes in the gap are
+zero-crossings of a dying signal, below both the stability floor and the
+null, and must not be read as structure.
+
+\paragraph{Frame-aware re-reading of the split.} The observational split
+of Table~\ref{tab:swiglu} is measured under a peak-fit frame and should be
+re-read against pre frames; the causal freezes are frame-free and the
+attribution stands regardless.
+
+\section{Limitations}
+\label{sec:limits}
+
+Four models, two families; a third family would promote the arrangement
+law from law-candidate to law and widen the relational law's base. The pre
+frame removes the direct containment circularity but not indirect paths
+(accumulated earlier writes shape the pre frame). All measurements use
+last-token states over one dataset (CounterFact, pinned revision) with one
+statement form per relation; template syntax may contribute to the
+continent anti-alignment, and crossed templates are the known cure. No
+permutation nulls were run on the provenance matrices themselves; the
+diagonal magnitudes sit far above the null scales measured on identical
+statistics, but the formal check is future work. Ablation measures
+necessity for linear readability of truth, not for behavior; the freezes
+act at the reading position only. The category section uses $60$ pairs per
+relation, no bootstrap error bars, and one degenerate relation on Llama
+(declared). The know-rate is a string-match lower bound. The
+propagate/overwrite reading is a description of measured alignments, not
+yet a circuit-level mechanism; why attention inherits frames and the FFN
+opposes them is the open question this paper sharpens rather than answers.
+
+\section{Reproducibility}
+\label{sec:repro}
+
+All tools import \texttt{truth\_probe.py} and \texttt{anatomy.py} from the
+companion repository and embed the identity, null, and stability
+safeguards described above; models load with safetensors only and
+\texttt{trust\_remote\_code=False}; the dataset revision is pinned in
+Sec.~\ref{sec:setup}. Two rules learned inside this project and now part of
+its method: the model is passed explicitly to every command (tool defaults
+differ, and one default produced the accidental replication of
+Sec.~\ref{sec:correction}), and no tool prints an automatic verdict. The
+Llama models require accepting the license on Hugging Face. Representative
+commands; repeat with \texttt{--model} and the landmarks of
+Table~\ref{tab:models} for each model:
+
+\begin{verbatim}
+# behavioral label BEFORE geometry, and the axis/probe gap (Table 1)
+python behav_check.py --model meta-llama/Llama-3.2-3B --n 200 --seed 0
+python truth_probe.py signal --model meta-llama/Llama-3.2-3B \
+       --dataset counterfact --max-pairs 250 --baseline --perm 200 \
+       --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
+
+# the flip, consolidated: 5 seeds + permutation null + rotation check (Table 2)
+python flip_consolidate.py --model meta-llama/Llama-3.2-3B \
+       --axis-block 9 --flip-layer 10 --scan-start 5 --scan-end 15
+
+# axis provenance: post and pre frames, both components (Tables 3-4)
+python axis_provenance.py --model meta-llama/Llama-3.2-3B --peak 9 \
+       --scan-start 5 --scan-end 15
+python axis_provenance.py --model meta-llama/Llama-3.2-3B --peak 9 \
+       --scan-start 5 --scan-end 15 --component attn
+
+# causal ablation with fixed-frame and frozen controls (Table 5)
+python ffn_erosion.py ablate --model meta-llama/Llama-3.2-3B \
+       --band-start 10 --band-end 12 --readout 12
+
+# exact gate/value split and causal freezes (Table 6)
+python swiglu.py attrib --model meta-llama/Llama-3.2-3B \
+       --axis-block 9 --scan-start 6 --scan-end 13
+python swiglu.py gatefreeze --model meta-llama/Llama-3.2-3B \
+       --band-start 10 --band-end 12 --readout 12
+
+# gauge-invariant circuit norms (weights only, CPU; Table 7)
+python circuits.py --model meta-llama/Llama-3.2-3B --dtype bfloat16 \
+       --peak 9 --flip 10
+
+# category geometry, arrangement law, dictionary export (Sec. 9-10)
+python categories.py --model Qwen/Qwen2.5-3B --peak 16 --write-layer 17 --k-relations 8
+python categories.py --model meta-llama/Llama-3.2-3B --peak 9 --write-layer 10 --k-relations 8
+python arrangement_law.py
+python dictionary_export.py --model Qwen/Qwen2.5-3B --peak 16 --write-layer 17 --k-relations 8
+python dictionary_export.py --model meta-llama/Llama-3.2-3B --peak 9 --write-layer 10 --k-relations 8
+\end{verbatim}
+
+\texttt{arrangement\_law.py} carries the canonical matrices transcribed in
+its source with the regeneration commands in its header; the transcription
+was verified cell-by-cell against fresh \texttt{categories.py} runs before
+the statistics reported here. Scripts are in \texttt{src/} of the
+repository (\texttt{github.com/Francesco-Marhel/TruthProbe}); figures
+\texttt{flip\_collapse.png}, \texttt{provenance\_asymmetry.png},
+\texttt{categories\_geometry.png}, \texttt{arrangement\_law.png} accompany
+the source. License: CC BY 4.0.
+
+\section{Conclusion}
+
+Two movements, one instrument, one discipline. The mechanics: attention
+propagates truth frames it did not write; the FFN opposes the frame of its
+moment and deposits the material of the next; the genuine post-peak erosion
+survives every control and is carried, on all four models, by the SwiGLU
+value stream. The geometry: the single axis is a semantically signed
+mixture whose arrangement the model does not inherit from the lexical
+surface but constructs, and constructs the same way across two families,
+because the arrangement belongs to the knowledge, not to the machine.
+Between the two movements sits the correction that makes them trustworthy:
+a pre-registered claim of ours, confirmed on three models, was exposed as
+the special case of a better law by a control built against our own
+instrument, and the paper reports the failure with the same care as the
+findings, because a result that has survived its owner's best attack is
+worth more than one that has never been attacked. The handoff to the next
+stage is concrete: a measured dictionary, a four-criterion contract for
+any sparse autoencoder that claims to do better, and a per-head question
+with its instrument already built.
+
+\section*{Acknowledgments}
+
+The author thanks Boaz Nadler for detailed comments on the companion
+manuscript, whose standards of definition and precision this document
+attempts to apply from the start.
+
+\begin{thebibliography}{9}
+
+\bibitem{companion} F.~K.~Vicidomini.
+\emph{How Much of Truth Fits on a Single Axis? Knowledge-Dependent
+Dimensionality, Polarity Recovery, and the Anatomy of a Truth Direction in
+Qwen2.5-1.5B.} Working paper, v2, July 2026. Zenodo DOI
+10.5281/zenodo.20938285.
+
+\bibitem{burger2024} L.~B\"urger, F.~A.~Hamprecht, B.~Nadler.
+\emph{Truth is Universal: Robust Detection of Lies in LLMs.}
+NeurIPS 2024. arXiv:2407.12831.
+
+\bibitem{meng2022} K.~Meng, D.~Bau, A.~Andonian, Y.~Belinkov.
+\emph{Locating and Editing Factual Associations in GPT.}
+NeurIPS 2022. arXiv:2202.05262.
+
+\bibitem{elhage2021} N.~Elhage et al.
+\emph{A Mathematical Framework for Transformer Circuits.}
+Transformer Circuits Thread, Anthropic, 2021.
+
+\bibitem{rotational2026} \emph{How Transformers Reject Wrong Answers:
+Rotational Dynamics of Factual Constraint Processing.}
+Preprint, February 2026.
+
+\bibitem{headgenome} \emph{The HeadGenome Taxonomy: A Structural and Causal
+Map of Attention Head Specialization in Transformers.}
+Preprint, OpenReview iG4i2pc4wg.
+
+\bibitem{platonic2024} M.~Huh, B.~Cheung, T.~Wang, P.~Isola.
+\emph{The Platonic Representation Hypothesis.}
+ICML 2024. arXiv:2405.07987.
+
+\end{thebibliography}
+
+\end{document}

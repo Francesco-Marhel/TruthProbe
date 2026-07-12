@@ -1,48 +1,57 @@
 # TruthProbe
 
-Unsupervised geometry of truth in small language models: a training-free
-truth axis, its knowledge-dependent dimensionality, and a cross-family
-anatomy of how the network builds and erodes it.
+Training-free geometry of truth in small language models: a single-axis
+truth direction (label-free up to sign, given the paired design), its
+knowledge-dependent dimensionality, a relational law of how attention and
+the FFN build and overwrite it, and the semantically signed category
+mixture it summarizes. Four base models, two families, pre-registered
+predictions throughout.
 
-Note for readers: If the built-in GitHub PDF viewer fails to load the previews or the download button hangs due to vector graphics complexity, you can download the full repository archive directly from Zenodo (Zenodo DOI
-10.5281/zenodo.20938285).
+## The manuscript (in `Paper/`)
 
+**The Anatomy of a Truth Direction: Knowledge-Dependent Dimensionality, a
+Relational Law, and a Convergent Category Geometry in Small Language
+Models** (`monolith.pdf`) consolidates the whole series in two parts:
 
-## Papers (in `Paper/`)
+- **Part I** (one model): the training-free axis from the SVD of
+  hidden-state minimal pairs; held-out AUC up to 0.938 against a
+  full-probe ceiling of 0.989; the axis-vs-probe gap grows as the model's
+  behavioral knowledge decreases and as material heterogeneity increases;
+  seven falsification experiments; recovery of the supervised polarity
+  direction of Buerger et al. at cosine 0.959 without polarity labels.
+- **Part II** (four models, two families): the relational law (FFN writes
+  oppose every truth frame that does not contain them; attention
+  propagates frames it did not write), narrated together with the
+  correction of our own earlier peak-anchored claim; causal attribution of
+  the post-peak erosion to the SwiGLU value stream on all four models;
+  two pre-registered discriminations (tug-of-war is a trait of scale,
+  ignition of one family); a pre-registered cross-family negative for the
+  static OV/QK crossover; and the category geometry, whose arrangement
+  converges across families (Mantel p = 0.0009).
 
-1. **How Much of Truth Fits on a Single Axis?** (`truth_axis_arxiv.pdf`) —
-   an unsupervised SVD truth axis at cost O(d); held-out AUC up to 0.938
-   with permutation control; the axis-vs-probe gap scales with the model's
-   knowledge of the fact; unsupervised recovery of the polarity direction of
-   Bürger et al. at cosine 0.959; seven falsification attempts, none of
-   which overturns the one-dimensional reading.
-2. **Anatomy of the Truth Axis in Qwen2.5-1.5B** (`anatomy_note.pdf`) —
-   working note, chapter 1 of the anatomy: attention/FFN decomposition of
-   the residual stream, per-layer readability, the expanded-space negative,
-   and the first causal ablations.
-  3. **Attention Propagates, the FFN Overwrites** (`FFN_flip_v2.pdf`, v2) —
-   chapter 2, closing the anatomy. An axis-provenance control generalized
-   v1's peak-anchored flip into a relational law: the FFN's write at block b
-   opposes every truth frame that does not contain it, while attention
-   propagates existing frames — near mirror images at the peak (+1.63 vs
-   −1.43 on Llama-3.2-3B). Confirmed by pre-registered prediction on four
-   models across two families (Qwen2.5-1.5B/3B, Llama-3.2-1B/3B). The
-   frame-free erosion, its causal value-stream attribution, and every v1
-   measurement stand; the dimensionality law gains a fourth point. v1's
-   peak-anchored interpretation is superseded (v1 in `drafts/`).
+Earlier standalone documents (the single-axis paper, the anatomy note,
+the flip note v1/v2, the category note) are superseded by the manuscript;
+their versions live in `drafts/`.
 
-Superseded versions live in `drafts/`.
+## The Axis Observatory
+
+`index.html` is an interactive summary (GitHub Pages): the measured
+per-category axes rendered in 3D, morphing from the lexical arrangement at
+block 2 to the peak arrangement, on both families. Every vector on screen
+is fitted to the measured signed-cosine matrices (fit error disclosed on
+the page; exact matrices in the paper).
 
 ## Layout
 
 ```
-Paper/          current papers (PDF) + figures/
+Paper/          current manuscript (PDF) + figures/
 drafts/         superseded working-note versions
-src/            all scripts, flat — they import each other; do not split
+src/            all scripts, flat; they import each other; do not split
                 into subfolders or the imports (and the commands in
                 REPRODUCING.md) break
+index.html      the Axis Observatory (GitHub Pages)
 README.md
-REPRODUCING.md  full reproduction commands for all three documents
+REPRODUCING.md  full reproduction commands, one command per reported number
 LICENSE         Apache 2.0 (code)
 ```
 
@@ -61,12 +70,14 @@ accept the license on Hugging Face and authenticate once with
 
 ## Reproducing
 
-Every number in the three documents is reproduced by one isolated command;
-the full list, organized per paper and per model, is in
-**[REPRODUCING.md](REPRODUCING.md)**. Every tool embeds its own shields —
-additive identity checks, held-out cross-validation over pairs, permutation
-nulls, multi-seed stability criteria — and prints its verdict: a run is
-certified by its in-code checks, not by its launch conditions.
+Every number in the manuscript is reproduced by one isolated command; the
+full list, organized per part and per model, is in
+**[REPRODUCING.md](REPRODUCING.md)**. Every tool embeds its own safeguards
+(additive identity checks, held-out cross-validation over pairs,
+permutation nulls, multi-seed stability criteria) and prints its
+measurements in full; no tool prints an automatic verdict, and the model
+is passed explicitly to every command. A run is certified by its in-code
+checks, not by its launch conditions.
 
 ## License
 
@@ -75,7 +86,6 @@ certified by its in-code checks, not by its launch conditions.
 
 ## Citation
 
-If you use this work, please cite the papers (Zenodo DOI
-10.5281/zenodo.20938285 for paper 1; the note DOIs are listed in `Paper/`
-once minted) and link this repository.
-Actual link for DOI: https://zenodo.org/records/21211758
+Please cite the manuscript via its Zenodo deposit
+(https://zenodo.org/records/21211758, DOI 10.5281/zenodo.20938285) and
+link this repository.

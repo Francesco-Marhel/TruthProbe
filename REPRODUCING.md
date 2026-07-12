@@ -1,9 +1,9 @@
 # Reproducing the results
 
 All commands are run from `src/`. Dataset revisions are pinned for exact
-reproducibility. Every tool embeds its own shields (identity checks,
+reproducibility. Every tool embeds its own safeguards (identity checks,
 held-out CV over pairs, permutation nulls, seed-stability criteria) and
-prints its verdict.
+prints its measurements in full; no tool prints an automatic verdict.
 
 > **Windows / PowerShell note:** the trailing `\` is bash line
 > continuation. On PowerShell, join each multi-line command onto a single
@@ -16,213 +16,157 @@ CounterFact : c945b082ca08d0a8f3ba227fb78404a09614c36e
 TruthfulQA  : 741b8276f2d1982aa3d5b832d3ee81ed3b896490
 ```
 
----
+## Golden rules (learned inside this project)
 
-## Paper 1 — How Much of Truth Fits on a Single Axis?
-
-Positive results (Tables 1, 2):
+1. **Pass `--model` explicitly to every command.** Tool defaults differ:
+   `flip_consolidate.py` defaults to Qwen2.5-3B, most other tools to
+   Qwen2.5-1.5B. One omitted flag once consolidated the wrong model (the
+   accident is reported in the manuscript; it accidentally confirmed the
+   relational law off-peak).
+2. **Landmarks are per model.** Use this table everywhere a command asks
+   for a peak, flip, band, or hidden level:
 
 ```
-python truth_probe.py signal --dataset builtin --with-2d --baseline --perm 200
+model          peak block   flip   erosion band   readout   hidden level (peak+1)
+Qwen2.5-1.5B       15         16      16-18          18            16
+Qwen2.5-3B         16         17      17-19          19            17
+Llama-3.2-1B        7          8       8-10          10             8
+Llama-3.2-3B        9         10      10-12          12            10
+```
 
-python truth_probe.py signal --dataset mix --max-pairs 250 \
+3. Save one output file per run; write predictions to a file **before**
+   launching runs on untested models.
+
+---
+
+## Part I (Qwen2.5-1.5B)
+
+Signal, baselines, permutation null (Tables 1-2); polarity; recovery:
+
+```
+python truth_probe.py signal --model Qwen/Qwen2.5-1.5B --dataset builtin \
+    --with-2d --baseline --perm 200
+python truth_probe.py signal --model Qwen/Qwen2.5-1.5B --dataset mix --max-pairs 250 \
     --with-2d --baseline --perm 200 \
     --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e \
     --rev-truthfulqa 741b8276f2d1982aa3d5b832d3ee81ed3b896490
-
-python truth_probe.py polarity
-python truth_probe.py recovery
+python truth_probe.py polarity --model Qwen/Qwen2.5-1.5B
+python truth_probe.py recovery --model Qwen/Qwen2.5-1.5B
 ```
 
-Controlled falsification attempts (Table 3, attempts 2–4; attempt 1 is the
-PHASE column of `signal` above):
+Falsification experiments (domino variants; canvas for the visual ones,
+one dataset at a time, never `--dataset mix` on canvas):
 
 ```
-python truth_probe.py domino --dataset builtin --perm 100
-
-python truth_probe.py domino --dataset mix --max-pairs 250 --signal-mag --perm 100 \
+python truth_probe.py domino --model Qwen/Qwen2.5-1.5B --dataset builtin --perm 100
+python truth_probe.py domino --model Qwen/Qwen2.5-1.5B --dataset mix --max-pairs 250 \
+    --signal-mag --perm 100 \
     --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e \
     --rev-truthfulqa 741b8276f2d1982aa3d5b832d3ee81ed3b896490
-
-python truth_probe.py domino --dataset mix --max-pairs 250 --per-layer-axis --perm 100 \
+python truth_probe.py domino --model Qwen/Qwen2.5-1.5B --dataset mix --max-pairs 250 \
+    --per-layer-axis --perm 100 \
     --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e \
     --rev-truthfulqa 741b8276f2d1982aa3d5b832d3ee81ed3b896490
-```
-
-Visual observations (Figs. 1–3, attempts 5–7). Run the two datasets
-separately; do not pass `--dataset mix` to `canvas.py` (mixing injects a
-spurious sentence-format axis):
-
-```
 python canvas.py --dataset counterfact --layer 16 --out counterfact \
     --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
-
 python canvas.py --dataset truthfulqa --layer 16 --out truthfulqa \
     --rev-truthfulqa 741b8276f2d1982aa3d5b832d3ee81ed3b896490
 ```
 
----
-
-## Note 1 — Anatomy of the Truth Axis in Qwen2.5-1.5B
-
-Anatomy and ablation scripts load the model in float32 (the attention/FFN
-decomposition identity requires the precision); ~6 GB of VRAM is enough for
-Qwen2.5-1.5B.
-
-Where the truth axis is born (attention vs FFN), per layer:
+Anatomy (attention/FFN decomposition, ablations, expanded-space negative):
 
 ```
-python anatomy.py --dataset builtin
-python anatomy.py --dataset counterfact --max-pairs 250 --perm 100 \
-    --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
+python anatomy.py --model Qwen/Qwen2.5-1.5B --dataset counterfact --max-pairs 250 \
+    --perm 100 --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
+python anatomy_consolidate.py --model Qwen/Qwen2.5-1.5B
+python ablation.py --model Qwen/Qwen2.5-1.5B
+python anatomy_expanded.py --model Qwen/Qwen2.5-1.5B
 ```
 
-Is the attn/FFN picture stable across seeds:
+Norm-weighting control (Methods of Part I; repeat per model with its
+hidden level from the table):
 
 ```
-python anatomy_consolidate.py --dataset counterfact --max-pairs 250 --seeds 5 \
-    --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
-```
-
-Truth axis inside the FFN expanded space (8960-dim; trust the margin over
-the elevated null, not the raw AUC):
-
-```
-python anatomy_expanded.py --dataset counterfact --max-pairs 250 --perm 100 \
-    --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
-```
-
-Causal ablation, the three bands of the note:
-
-```
-# middle band (attention builds the signal)
-python ablation.py --dataset counterfact --max-pairs 250 \
-    --band-start 11 --band-end 15 --readout 15 \
-    --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
-
-# transition band (the FFN degrades the signal)
-python ablation.py --dataset counterfact --max-pairs 250 \
-    --band-start 16 --band-end 18 --readout 18 \
-    --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
-
-# late band (nothing remains to destroy)
-python ablation.py --dataset counterfact --max-pairs 250 \
-    --band-start 19 --band-end 26 --readout 27 \
-    --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
+python axis_norm_check.py --model Qwen/Qwen2.5-1.5B --layer 16
 ```
 
 ---
 
-## Note 2 — The FFN Flip is Peak-Relative
+## Part II (four models; repeat each block with each `--model` and its
+landmarks from the table)
 
-The CounterFact revision is the default in every note-2 script; the flags
-below are shown explicitly only where they differ per model. Decomposition
-runs are float32 (the 3B models spill to system RAM on a 12 GB GPU; the
-in-code identity check certifies the run either way).
-
-### Qwen2.5-1.5B (peak block 15, flip 16, band 16–18)
+Phase 0: behavioral label BEFORE geometry, then peaks and the axis/probe
+gap under the uniform protocol:
 
 ```
-# who writes how much, and what, along the fixed truth axis
-python ffn_erosion.py contrib
-
-# corrected ablation: refit vs fixed-axis vs frozen control
-python ffn_erosion.py ablate
-
-# which layer's FFN erodes (single + cumulative)
-python ffn_erosion.py sweep
-
-# qualitative logit-lens of the band FFN contributions
-python ffn_erosion.py lens
-
-# exact gate/value split of the FFN's truth-axis gap (Eq. 1 of the note)
-python swiglu.py attrib
-
-# causal: freeze gate variation vs value variation in the band
-python swiglu.py gatefreeze
-
-# framing 2x2 (moral/prudential; lexical confound declared in the note)
-python swiglu.py framing
-
-# gauge-invariant static QK/OV circuit norms (weights only, CPU is fine)
-python circuits.py
-```
-
-### Qwen2.5-3B (peak block 16, flip 17, band 17–19)
-
-```
-python truth_probe.py signal --dataset counterfact --max-pairs 250 \
-    --model Qwen/Qwen2.5-3B --baseline --perm 100 \
+python behav_check.py --model meta-llama/Llama-3.2-3B --n 200 --seed 0
+python truth_probe.py signal --model meta-llama/Llama-3.2-3B \
+    --dataset counterfact --max-pairs 250 --baseline --perm 200 \
     --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
-
-python ffn_erosion.py contrib --model Qwen/Qwen2.5-3B \
-    --axis-block 16 --band-start 17 --band-end 19 --scan-start 12 --scan-end 23
-
-# 5 seeds + permutation null + rotation-vs-erosion check, one extraction
-python flip_consolidate.py --model Qwen/Qwen2.5-3B
-
-python ffn_erosion.py ablate --model Qwen/Qwen2.5-3B \
-    --band-start 17 --band-end 19 --readout 19
-
-python circuits.py --model Qwen/Qwen2.5-3B --dtype bfloat16
 ```
 
-### Llama-3.2-1B (peak block 7, flip 8; gated repo, see README)
+Phase 1: the flip, consolidated (5 seeds + permutation null + rotation
+check; float32):
 
 ```
-# behavior BEFORE geometry: the KNOWN rate pre-registers the expected gap
-python behav_check.py --model meta-llama/Llama-3.2-1B
-
-python truth_probe.py signal --dataset counterfact --max-pairs 250 \
-    --model meta-llama/Llama-3.2-1B --baseline --with-2d --perm 100 \
-    --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
-
-python flip_consolidate.py --model meta-llama/Llama-3.2-1B \
-    --axis-block 7 --flip-layer 8 --scan-start 3 --scan-end 13
+python flip_consolidate.py --model meta-llama/Llama-3.2-3B \
+    --axis-block 9 --flip-layer 10 --scan-start 5 --scan-end 15
 ```
 
-### Note 2, version 2 — the axis-provenance control (relational law, 4 models)
-
-Requires `flip_consolidate.py` in the same folder (import dependency). Each
-model: one run for the FFN, one with `--component attn`. Outputs are matrices
-+ diagonal summaries (no auto-verdict); the paper's Tables 2–3 are the POST
-and PRE diagonal summaries respectively. Commands are single-line
-(PowerShell-safe).
+Phase 2: axis provenance, post and pre frames, both components:
 
 ```
-python axis_provenance.py --peak 15 --scan-start 12 --scan-end 20
-python axis_provenance.py --peak 15 --scan-start 12 --scan-end 20 --component attn
-python axis_provenance.py --model Qwen/Qwen2.5-3B --peak 16 --scan-start 13 --scan-end 21
-python axis_provenance.py --model Qwen/Qwen2.5-3B --peak 16 --scan-start 13 --scan-end 21 --component attn
-python axis_provenance.py --model meta-llama/Llama-3.2-1B --peak 7 --scan-start 3 --scan-end 13
-python axis_provenance.py --model meta-llama/Llama-3.2-1B --peak 7 --scan-start 3 --scan-end 13 --component attn
-python axis_provenance.py --model meta-llama/Llama-3.2-3B --peak 9 --scan-start 5 --scan-end 15
-python axis_provenance.py --model meta-llama/Llama-3.2-3B --peak 9 --scan-start 5 --scan-end 15 --component attn
+python axis_provenance.py --model meta-llama/Llama-3.2-3B --peak 9 \
+    --scan-start 5 --scan-end 15
+python axis_provenance.py --model meta-llama/Llama-3.2-3B --peak 9 \
+    --scan-start 5 --scan-end 15 --component attn
 ```
 
-### Note 3, SAE-Overlapping From FFN-flip
-
-Requires `Scripts categories.py`, `dictionary_export.py`, `arrangement_law.py` in src 
-in the same folder (import dependency).
+Phase 3: causal ablation over the erosion band; exact SwiGLU split and
+causal freezes:
 
 ```
-python categories.py--model Qwen/Qwen2.5-3B--peak 16--write-layer 17--k-relations 8
-python categories.py--model meta-llama/Llama-3.2-3B--peak 9--write-layer 10--k-relations 8
+python ffn_erosion.py ablate --model meta-llama/Llama-3.2-3B \
+    --band-start 10 --band-end 12 --readout 12
+python swiglu.py attrib --model meta-llama/Llama-3.2-3B \
+    --axis-block 9 --scan-start 6 --scan-end 13
+python swiglu.py gatefreeze --model meta-llama/Llama-3.2-3B \
+    --band-start 10 --band-end 12 --readout 12
+```
+
+Phase 4: gauge-invariant static circuit norms (weights only; CPU is
+fine). Landmarks are annotations only; the norm tables do not depend on
+them:
+
+```
+python circuits.py --model meta-llama/Llama-3.2-3B --dtype bfloat16 \
+    --peak 9 --flip 10
+```
+
+Phase 5: category geometry (the registered falsification runs on the two
+3B models; Llama-3.2-1B is excluded by the scoping rule stated in the
+manuscript), arrangement law, dictionary export:
+
+```
+python categories.py --model Qwen/Qwen2.5-3B --peak 16 --write-layer 17 --k-relations 8
+python categories.py --model meta-llama/Llama-3.2-3B --peak 9 --write-layer 10 --k-relations 8
+python categories.py --model Qwen/Qwen2.5-1.5B --peak 15 --write-layer 16 --k-relations 5
 python arrangement_law.py
-# R5 + controls from the canonical matrices
-python dictionary_export.py--model Qwen/Qwen2.5-3B--peak 16--write-layer 17
+python dictionary_export.py --model Qwen/Qwen2.5-3B --peak 16 --write-layer 17 --k-relations 8
+python dictionary_export.py --model meta-llama/Llama-3.2-3B --peak 9 --write-layer 10 --k-relations 8
 ```
 
-Fourth dimensionality point (behavior BEFORE geometry):
+`arrangement_law.py` carries the canonical matrices transcribed in its
+source, with the regeneration commands in its header; before trusting its
+statistics after any change, diff the matrices printed by fresh
+`categories.py` runs against the constants in the source, cell by cell.
+Note the `--k-relations 8` on `dictionary_export.py`: the tool's default
+is 5, and the manuscript's dictionaries are K = 8.
+
+Synthetic validations of the intervention tooling (run anytime, no GPU):
 
 ```
-python behav_check.py --model meta-llama/Llama-3.2-3B
-python truth_probe.py signal --dataset counterfact --max-pairs 250 --model meta-llama/Llama-3.2-3B --baseline --perm 100 --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
+python test_axis_provenance.py
+python test_ffn_erosion.py
+python test_swiglu.py
 ```
-
-### Figures
-
-Fig. 1 of v2 (`provenance_asymmetry.png`): heatmaps of the PRE-ruler
-matrices (FFN above, attention below, four models) — built directly from
-the `axis_provenance.py` outputs above. The v1 peak-aligned collapse
-figure remains valid as the b = peak slice of these matrices.

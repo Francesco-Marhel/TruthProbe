@@ -79,6 +79,10 @@ measurements in full; no tool prints an automatic verdict, and the model
 is passed explicitly to every command. A run is certified by its in-code
 checks, not by its launch conditions.
 
+The calculated truth directions and extracted semantic weights are organized in the `Data/` directory, divided by model architecture. 
+Each folder contains both the raw PyTorch weights (`.pt`) for direct implementation,
+and human-readable text mappings (`.json`) for quick inspection.
+
 ## License
 
 - **Code** (`src/`): Apache License 2.0 (see `LICENSE`).

@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0f1d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2305080f'/%3E%3Ctext x='32' y='46' font-size='40' text-anchor='middle' fill='%23caa96b' font-family='Georgia,serif'%3E%CE%91%3C/text%3E%3C/svg%3E">
+<title>ΑΛΗΘΕΙΑ // Axis Observatory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05080f; --cy:#3ff0d8; --cy2:#19a08c; --mg:#ff4d7e; --am:#ffb347;
+  --tx:#e8e2d0; --dim:#8a8272; --au:#caa96b; --au-hi:#e9d8a6; --au-lo:#8a6f3c;
+  --glass:rgba(8,10,8,.72); --hair:rgba(202,169,107,.28);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--tx);
+ font-family:"JetBrains Mono","Cascadia Code",Consolas,monospace;overflow:hidden}
+#scene{position:fixed;inset:0}
+#vig{position:fixed;inset:0;pointer-events:none;z-index:15;
+ background:radial-gradient(ellipse at 50% 42%,transparent 52%,rgba(2,4,10,.6) 100%)}
+#hud{position:fixed;inset:0;pointer-events:none;z-index:20}
+
+/* ---------- title ---------- */
+#title{position:absolute;top:16px;left:50%;transform:translateX(-50%);text-align:center;
+ font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;font-size:22px;letter-spacing:.48em;
+ padding-left:.48em;
+ background:linear-gradient(180deg,var(--au-hi) 0%,var(--au) 55%,var(--au-lo) 100%);
+ -webkit-background-clip:text;background-clip:text;color:transparent;
+ filter:drop-shadow(0 0 18px rgba(202,169,107,.55))}
+#title small{display:block;font-family:"JetBrains Mono",monospace;font-weight:400;
+ letter-spacing:.22em;color:var(--dim);font-size:9.5px;margin-top:7px;
+ -webkit-text-fill-color:var(--dim)}
+#title::after{content:"";display:block;width:180px;height:1px;margin:9px auto 0;
+ background:linear-gradient(90deg,transparent,var(--au),transparent);opacity:.7}
+#wip{position:absolute;top:98px;left:50%;transform:translateX(-50%);
+ font-size:8.5px;letter-spacing:.26em;color:#7fd8ff;padding:5px 14px;
+ border:1px solid rgba(127,216,255,.30);border-radius:3px;
+ background:rgba(10,18,30,.45);backdrop-filter:blur(6px);
+ text-shadow:0 0 8px rgba(127,216,255,.6);white-space:nowrap;
+ animation:wflick 4s steps(1,end) infinite;pointer-events:none}
+@keyframes wflick{0%,100%{opacity:.85}88%{opacity:.85}89%{opacity:.25}90%{opacity:.8}
+ 93%{opacity:.35}94%{opacity:.85}97%{opacity:.5}98%{opacity:.85}}
+
+/* ---------- side columns: panel+controls (left), panel+links (right) ---------- */
+#leftCol,#rightCol{position:absolute;top:86px;bottom:16px;width:min(342px,24.5vw);
+ display:flex;flex-direction:column;gap:12px;pointer-events:none}
+#leftCol{left:18px}#rightCol{right:18px}
+#leftCol>*,#rightCol>*{pointer-events:auto}
+/* ---------- glass panels ---------- */
+.term{position:relative;flex:1 1 auto;min-height:120px;
+ background:linear-gradient(165deg,rgba(12,14,11,.78),rgba(3,5,4,.86));
+ border:1px solid var(--hair);border-radius:12px;
+ backdrop-filter:blur(10px) saturate(1.25);
+ box-shadow:0 22px 60px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.05);
+ padding:13px 15px;font-size:11.5px;line-height:1.6;overflow:hidden}
+.term::before,.term::after{content:"";position:absolute;width:14px;height:14px;
+ border:1px solid rgba(202,169,107,.75);pointer-events:none}
+.term::before{top:-1px;left:-1px;border-right:none;border-bottom:none;border-radius:12px 0 0 0}
+.term::after{bottom:-1px;right:-1px;border-left:none;border-top:none;border-radius:0 0 12px 0}
+.term h3{font-size:9.5px;font-weight:700;letter-spacing:.32em;color:var(--au);
+ padding-bottom:8px;margin-bottom:10px;position:relative}
+.term h3::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
+ background:linear-gradient(90deg,rgba(202,169,107,.65),transparent)}
+.term pre{white-space:pre-wrap;word-break:break-word;color:var(--tx);
+ font-family:"JetBrains Mono",monospace}
+.term .c{color:#7d8a6f}.term .k{color:var(--cy)}.term .n{color:var(--am)}.term .neg{color:var(--mg)}
+
+/* ---------- relation tablets ---------- */
+#bench{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.ticket{position:relative;background:linear-gradient(178deg,rgba(26,24,17,.94),rgba(7,8,6,.94));
+ border:1px solid rgba(202,169,107,.42);color:var(--tx);font-family:inherit;font-size:10px;
+ padding:9px 11px;border-radius:8px;cursor:pointer;letter-spacing:.06em;text-align:left;
+ transition:transform .22s cubic-bezier(.3,1.4,.5,1),border-color .22s,box-shadow .22s;overflow:hidden}
+.ticket::before{content:"";position:absolute;inset:0;
+ background:linear-gradient(120deg,transparent 30%,rgba(255,244,214,.09) 50%,transparent 70%);
+ transform:translateX(-110%);transition:transform .5s ease}
+.ticket:hover::before{transform:translateX(110%)}
+.ticket b{display:block;color:var(--cy);font-size:11.5px;letter-spacing:.1em;margin-bottom:1px}
+.ticket:hover{border-color:var(--au);box-shadow:0 6px 20px rgba(0,0,0,.5),0 0 16px rgba(202,169,107,.35);transform:translateY(-3px)}
+.ticket.on{border-color:var(--cy);box-shadow:0 0 22px rgba(63,240,216,.45),inset 0 0 18px rgba(63,240,216,.07);
+ background:linear-gradient(178deg,rgba(16,44,40,.95),rgba(6,16,14,.95))}
+
+/* ---------- control bar ---------- */
+#ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;
+ background:var(--glass);border:1px solid var(--hair);border-radius:12px;
+ backdrop-filter:blur(10px);padding:10px 12px;font-size:10.5px;
+ box-shadow:0 14px 40px rgba(0,0,0,.5)}
+#depth{flex:1 1 80px;min-width:70px;accent-color:var(--cy);cursor:pointer}
+.mbtn{background:none;border:1px solid rgba(202,169,107,.45);color:var(--dim);
+ font-family:inherit;font-size:9.5px;padding:6px 11px;border-radius:999px;cursor:pointer;
+ letter-spacing:.12em;transition:all .2s}
+.mbtn:hover{color:var(--tx);border-color:var(--au)}
+.mbtn.on{color:var(--cy);border-color:var(--cy);box-shadow:0 0 12px rgba(63,240,216,.4)}
+#play{background:linear-gradient(180deg,var(--au-hi),var(--au));color:#120d04;border:none;
+ font-family:inherit;font-weight:700;font-size:10px;padding:7px 13px;border-radius:999px;
+ cursor:pointer;letter-spacing:.15em;transition:filter .2s,transform .2s}
+#play:hover{filter:brightness(1.12);transform:translateY(-1px)}
+#legend{position:absolute;left:50%;transform:translateX(-50%);bottom:24px;text-align:center;
+ font-size:8.5px;letter-spacing:.2em;color:var(--dim);pointer-events:none;white-space:nowrap}
+#legend .l1{color:var(--cy)}#legend .l2{color:var(--am)}
+/* ---------- external links (right column, below the panel) ---------- */
+#links{display:flex;flex-direction:column;gap:8px}
+.lnk{display:block;text-align:center;text-decoration:none;color:var(--au);
+ font-size:10px;letter-spacing:.18em;padding:10px 12px;border-radius:10px;
+ background:linear-gradient(178deg,rgba(26,24,17,.94),rgba(7,8,6,.94));
+ border:1px solid rgba(202,169,107,.45);transition:all .22s}
+.lnk:hover{border-color:var(--au);color:var(--au-hi);
+ box-shadow:0 6px 20px rgba(0,0,0,.5),0 0 16px rgba(202,169,107,.4);transform:translateY(-2px)}
+
+#hint{position:absolute;left:50%;bottom:64px;transform:translateX(-50%);
+ font-size:10.5px;letter-spacing:.24em;color:var(--au);
+ text-shadow:0 0 12px rgba(202,169,107,.7);animation:hp 2.2s ease-in-out infinite;pointer-events:none}
+@keyframes hp{0%,100%{opacity:.22}50%{opacity:1}}
+#foot{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);
+ font-size:9px;color:var(--dim);letter-spacing:.05em;white-space:nowrap}
+#foot a{color:var(--cy2);text-decoration:none}
+#foot a:hover{color:var(--cy)}
+
+/* ---------- boot ---------- */
+#boot{position:fixed;inset:0;background:#040710;z-index:60;display:flex;flex-direction:column;
+ align-items:center;justify-content:center;gap:22px;transition:opacity 1.4s}
+.bootline{width:280px;height:1px;background:linear-gradient(90deg,transparent,var(--au),transparent);
+ transform:scaleX(0);animation:bl 1.6s ease forwards}
+@keyframes bl{to{transform:scaleX(1)}}
+#bootlog{font-size:12px;line-height:2;color:var(--au);
+ text-shadow:0 0 10px rgba(202,169,107,.8);min-width:380px;min-height:230px}
+.pulse{position:fixed;width:7px;height:7px;border-radius:50%;z-index:30;pointer-events:none}
+/* ---------- page fade to the landing ---------- */
+#fader{position:fixed;inset:0;background:#040710;z-index:70;pointer-events:none;
+ opacity:0;transition:opacity .55s ease}
+body.leaving #fader{opacity:1;pointer-events:auto}
+#mInfo{display:none}
+/* ---------- phone layout: tablet strip + compact controls docked at the bottom ---------- */
+@media(max-width:920px){
+  #title{top:8px;font-size:13.5px;letter-spacing:.26em;padding-left:.26em;width:96vw}
+  #title small{font-size:7.5px;letter-spacing:.1em;margin-top:5px}
+  #title::after{margin-top:6px;width:120px}
+  #wip{top:60px;font-size:7px;letter-spacing:.12em;padding:4px 10px;
+   max-width:92vw;white-space:normal;text-align:center}
+  .term{display:none}
+  #rightCol{display:contents}
+  #links{position:absolute;top:88px;left:50%;transform:translateX(-50%);
+   flex-direction:row;gap:6px;width:auto}
+  .lnk{font-size:8px;letter-spacing:.08em;padding:6px 10px;border-radius:8px;white-space:nowrap}
+  #leftCol{left:0;right:0;top:auto;bottom:0;width:auto;gap:8px;
+   padding:10px 10px calc(10px + env(safe-area-inset-bottom,0px));
+   background:linear-gradient(180deg,transparent,rgba(4,7,16,.92) 42%)}
+  #bench{order:1;display:flex;overflow-x:auto;gap:6px;padding-bottom:2px;
+   scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  #bench::-webkit-scrollbar{display:none}
+  .ticket{flex:0 0 auto;min-width:118px}
+  #ctrl{order:2;padding:8px 10px;font-size:9px;gap:6px 8px}
+  #mInfo{display:inline-block}
+  #legend{display:none}
+  #foot{display:none}
+  #hint{bottom:auto;top:124px;font-size:9px;letter-spacing:.14em;
+   white-space:normal;width:86vw;text-align:center}
+  /* THEORY.LOG becomes a tap-to-close overlay card */
+  #theoT.ovl{display:block;position:fixed;left:12px;right:12px;top:118px;
+   max-height:52vh;overflow-y:auto;z-index:46;flex:none;pointer-events:auto}
+}
+</style>
+</head>
+<body>
+<div id="fader"></div>
+<div id="boot">
+  <div class="bootline"></div>
+  <div id="bootlog"></div>
+  <div class="bootline" style="animation-delay:.4s"></div>
+</div>
+<canvas id="scene"></canvas>
+<div id="vig"></div>
+<div id="hud">
+  <div id="title">&#913;&#923;&#919;&#920;&#917;&#921;&#913; // AXIS OBSERVATORY<small>aletheia: un-concealment &middot; every vector is a measurement</small></div>
+  <div id="wip">[ WORK IN PROGRESS &mdash; EXPANDING AXIS COSINE MATRIX ]</div>
+  <div id="leftCol">
+    <div class="term" id="codeT"><h3>PYTORCH.CORE</h3><pre id="codeP"></pre></div>
+    <div id="ctrl">
+      <button class="mbtn on" id="mq">QWEN2.5-3B</button>
+      <button class="mbtn" id="ml">LLAMA-3.2-3B</button>
+      <span style="color:var(--dim);letter-spacing:.15em">DEPTH</span>
+      <span style="font-size:9px;color:var(--dim)">block 2</span>
+      <input type="range" id="depth" min="0" max="1000" value="0">
+      <span style="font-size:9px;color:var(--cy)">peak</span>
+      <button id="play">&#9654; RUN MORPH</button>
+      <button class="mbtn" id="mInfo" aria-label="show theory log">&#9432; INFO</button>
+    </div>
+    <div id="bench"></div>
+  </div>
+  <div id="rightCol">
+    <div class="term" id="theoT"><h3>THEORY.LOG</h3><pre id="theoP"></pre></div>
+    <div id="links">
+      <a class="lnk" id="homeL" href="index.html">&#8672; PAPER &amp; PROJECT</a>
+      <a class="lnk" href="https://github.com/Francesco-Marhel/TruthProbe" target="_blank" rel="noopener">&#10148; GITHUB &middot; TruthProbe</a>
+    </div>
+  </div>
+  <div id="hint">select a relation on the tablet to unveil the axis</div>
+  <div id="legend"><span class="l1">&#9672; ATTENTION INFLOW</span> &nbsp;&middot;&nbsp; <span class="l2">&#10022; FFN WRITE</span></div>
+  <div id="foot">3D layout fitted to the measured signed-cosine matrices (mean |&Delta;cos| 0.19&ndash;0.25; exact matrices in the paper) &middot; <a href="https://github.com/Francesco-Marhel/TruthProbe" target="_blank">github/TruthProbe</a> &middot; <a href="https://doi.org/10.5281/zenodo.20938285" target="_blank">papers</a></div>
+</div>
+
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+/* ================= MEASURED DATA — do not edit ================= */
+const DATA = {"cats": ["P103", "P1412", "P176", "P27", "P30", "P37", "P413", "P495"], "coords": {"qwen_peak": [[-0.9996, -0.0277, -0.0083], [-0.9995, 0.0286, 0.0158], [-0.0909, -0.9958, 0.0135], [-0.9852, -0.1544, -0.0745], [0.144, -0.0806, 0.9863], [-0.9936, 0.0979, 0.0555], [0.0819, -0.045, -0.9956], [-0.0798, -0.9967, 0.0145]], "qwen_early": [[0.9985, 0.0208, 0.0504], [0.9977, 0.0343, -0.0584], [0.0412, -0.0083, 0.9991], [-0.2294, -0.9732, 0.0137], [-0.0128, -0.9979, -0.063], [-0.9978, -0.0306, 0.059], [-0.0671, 0.0238, 0.9975], [0.1694, -0.9846, 0.0441]], "llama_peak": [[-0.9821, 0.1544, -0.1079], [-0.9789, 0.1762, -0.1032], [-0.967, -0.2227, 0.1237], [-0.9993, 0.0039, 0.038], [0.0765, -0.9966, -0.0292], [-0.9971, 0.0579, -0.0498], [-0.04, 0.0742, 0.9964], [-0.9906, -0.1141, 0.0759]], "llama_early": [[-0.0685, 0.044, 0.9967], [-0.995, 0.0462, 0.0891], [0.0367, -0.0598, 0.9975], [0.1528, -0.988, 0.0222], [0.0135, -0.9933, -0.1144], [0.9876, -0.0623, -0.1441], [0.9924, 0.0411, 0.1163], [-0.1345, -0.9861, 0.0977]]}, "cos": {"qwen_peak": [[1, 0.36, 0.13, 0.28, -0.1, 0.27, -0.02, 0.11], [0.36, 1, 0.11, 0.38, -0.13, 0.76, -0.06, 0.09], [0.13, 0.11, 1, 0.25, 0.07, 0, 0, 0.03], [0.28, 0.38, 0.25, 1, -0.2, 0.28, -0.04, 0.16], [-0.1, -0.13, 0.07, -0.2, 1, -0.07, -0.09, 0.05], [0.27, 0.76, 0, 0.28, -0.07, 1, -0.06, 0.09], [-0.02, -0.06, 0, -0.04, -0.09, -0.06, 1, -0.01], [0.11, 0.09, 0.03, 0.16, 0.05, 0.09, -0.01, 1]], "qwen_early": [[1, 0.31, 0.04, -0.19, -0.08, -0.26, -0.05, 0.09], [0.31, 1, -0.02, -0.24, -0.03, -0.9, -0.09, 0.08], [0.04, -0.02, 1, -0.03, 0.01, 0.03, 0.03, 0.01], [-0.19, -0.24, -0.03, 1, 0.23, 0.23, 0.03, 0.27], [-0.08, -0.03, 0.01, 0.23, 1, 0.04, -0.1, 0.13], [-0.26, -0.9, 0.03, 0.23, 0.04, 1, 0.08, -0.09], [-0.05, -0.09, 0.03, 0.03, -0.1, 0.08, 1, 0.01], [0.09, 0.08, 0.01, 0.27, 0.13, -0.09, 0.01, 1]], "llama_peak": [[1, 0.69, 0.4, 0.66, -0.14, 0.56, 0, 0.51], [0.69, 1, 0.38, 0.62, -0.15, 0.62, 0.01, 0.52], [0.4, 0.38, 1, 0.51, -0.01, 0.4, 0.06, 0.51], [0.66, 0.62, 0.51, 1, -0.09, 0.55, 0.06, 0.75], [-0.14, -0.15, -0.01, -0.09, 1, -0.09, -0.06, -0.03], [0.56, 0.62, 0.4, 0.55, -0.09, 1, 0.03, 0.52], [0, 0.01, 0.06, 0.06, -0.06, 0.03, 1, 0.06], [0.51, 0.52, 0.51, 0.75, -0.03, 0.52, 0.06, 1]], "llama_early": [[1, 0.08, 0.05, -0.05, -0.06, -0.18, -0.03, 0.03], [0.08, 1, 0.04, -0.16, -0.06, -0.86, -0.03, 0.08], [0.05, 0.04, 1, 0.1, -0.05, -0.04, 0, 0.08], [-0.05, -0.16, 0.1, 1, 0.17, 0.21, 0.04, 0.11], [-0.06, -0.06, -0.05, 0.17, 1, 0.08, -0.01, 0.07], [-0.18, -0.86, -0.04, 0.21, 0.08, 1, 0.03, -0.11], [-0.03, -0.03, 0, 0.04, -0.01, 0.03, 1, -0.01], [0.03, 0.08, 0.08, 0.11, 0.07, -0.11, -0.01, 1]]}, "stress": {"qwen_peak": 0.218, "qwen_early": 0.194, "llama_peak": 0.254, "llama_early": 0.233}};
+const NAMES = {P103:"mother tongue",P1412:"languages spoken",P176:"manufacturer",P27:"citizenship",P30:"continent",P37:"official language",P413:"sport position",P495:"country of origin"};
+/* duotone Hashgraph palette: cyan/blue = language block & allies, amber = outliers */
+const COLORS = {P103:0x6fe7ff,P1412:0x4dd8ff,P37:0x38c8f0,P27:0x5e8bff,P495:0x7fa8ff,P30:0xffb347,P413:0xffd27a,P176:0xff9a3c};
+const DECODE = {qwen:{ffn:"74.17%",lex:"39.17%"},llama:{ffn:"81.67%",lex:"42.08%"}};
+/* =============================================================== */
+
+let model="qwen", depth=0, depthTarget=0, selected="P1412";
+
+/* ---------- renderer (native, no post-processing) ---------- */
+const canvas=document.getElementById('scene');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
+const IS_MOBILE=matchMedia('(max-width:920px)').matches;
+renderer.setPixelRatio(Math.min(devicePixelRatio,IS_MOBILE?1.4:1.75));
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.1;
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x05080f);          // deep night blue, not pure black
+scene.fog=new THREE.FogExp2(0x0a0f1d,0.012);         // soft horizon haze
+
+const CORE_Y=2.6, SR=1.35, R=1.0;                    // sphere center / radius / axis length
+
+const cam=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,0.1,160);
+cam.position.set(0,4,9);    // inside the colonnade (Z=9), facing sphere and tripod
+
+/* static cinematic orbit: the scene is born stable; free 360° manual exploration */
+const controls=new OrbitControls(cam,renderer.domElement);
+controls.target.set(0,1.35,0);
+controls.enableDamping=true; controls.dampingFactor=0.05;
+controls.autoRotate=false;                       // no auto-rotation at startup
+controls.enablePan=false;
+controls.minDistance=5.5; controls.maxDistance=19;
+controls.minPolarAngle=0.15; controls.maxPolarAngle=1.52;
+controls.zoomSpeed=0.6;
+
+/* ---------- shared textures / helpers ---------- */
+function glowTexture(){const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');
+const gr=g.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,'rgba(255,255,255,1)');
+gr.addColorStop(0.25,'rgba(255,255,255,0.55)');gr.addColorStop(1,'rgba(255,255,255,0)');
+g.fillStyle=gr;g.fillRect(0,0,128,128);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;}
+const GLOWTEX=glowTexture();
+function randDir(r){const t=Math.random()*6.283,p=Math.acos(2*Math.random()-1);
+return new THREE.Vector3(r*Math.sin(p)*Math.cos(t),r*Math.cos(p),r*Math.sin(p)*Math.sin(t));}
+/* holographic wireframe material factory — all flicker together, softly */
+const holoMats=[];
+function holo(color,opacity,wire=true){
+  const m=new THREE.MeshBasicMaterial({color,wireframe:wire,transparent:true,opacity,
+   blending:THREE.AdditiveBlending,depthWrite:false});
+  holoMats.push({m,base:opacity,ph:Math.random()*6.28});
+  return m;
+}
+
+/* ---------- night sky ---------- */
+function cloudPts(N,rmin,rspan,size,color,op){const g=new THREE.BufferGeometry();const a=new Float32Array(N*3);
+for(let i=0;i<N;i++){const v=randDir(rmin+Math.random()*rspan);a[3*i]=v.x;a[3*i+1]=Math.abs(v.y)*0.9+0.5;a[3*i+2]=v.z;}
+g.setAttribute('position',new THREE.BufferAttribute(a,3));
+const p=new THREE.Points(g,new THREE.PointsMaterial({color,size,transparent:true,opacity:op,depthWrite:false,blending:THREE.AdditiveBlending}));
+scene.add(p);return p;}
+cloudPts(1200,14,26,0.06,0xcfe0ff,0.8);
+cloudPts(400,10,7,0.07,0x86a8ff,0.45);
+
+/* ---------- THE REAL SKY: bright-star catalog (Hipparcos values, rounded),
+   classical constellation figures, the Milky Way band, wandering planets,
+   and the occasional falling star. All materials fog:false — the haze is
+   for the temple, not for the heavens. ---------- */
+const SKY_R=118;
+const sky=new THREE.Group(), skyRot=new THREE.Group();
+sky.add(skyRot); scene.add(sky);
+sky.rotation.x=THREE.MathUtils.degToRad(50);  // celestial pole ~40° above the horizon
+sky.rotation.y=0.6;                           // a pleasant initial hour angle
+function radec(ra,dec){const A=ra/24*6.28319,D=dec/57.29578;
+ return new THREE.Vector3(Math.cos(D)*Math.cos(A),Math.sin(D),Math.cos(D)*Math.sin(A)).multiplyScalar(SKY_R);}
+/* per constellation: [ stars [ra h, dec °, mag, warm?], line pairs ] */
+const CONSTS=[
+/*Orion*/[[[5.92,7.41,0.45,1],[5.24,-8.20,0.18],[5.42,6.35,1.64],[5.53,-0.30,2.25],[5.60,-1.20,1.69],[5.68,-1.94,1.88],[5.80,-9.67,2.07],[5.59,9.93,3.39]],[[7,0],[7,2],[0,5],[2,3],[3,4],[4,5],[3,1],[5,6],[1,6]]],
+/*UMa*/[[[11.06,61.75,1.79],[11.03,56.38,2.37],[11.90,53.69,2.44],[12.26,57.03,3.31],[12.90,55.96,1.77],[13.40,54.93,2.27],[13.79,49.31,1.86]],[[0,1],[1,2],[2,3],[3,0],[3,4],[4,5],[5,6]]],
+/*Cas*/[[[0.15,59.15,2.27],[0.68,56.54,2.24,1],[0.95,60.72,2.47],[1.43,60.24,2.68],[1.91,63.67,3.38]],[[0,1],[1,2],[2,3],[3,4]]],
+/*Cyg*/[[[20.69,45.28,1.25],[20.37,40.26,2.23],[20.77,33.97,2.46],[19.75,45.13,2.87],[19.51,27.96,3.18]],[[0,1],[1,2],[1,3],[1,4]]],
+/*Lyr*/[[[18.62,38.78,0.03],[18.83,33.36,3.52],[18.98,32.69,3.26],[18.75,37.61,4.34]],[[0,3],[3,1],[1,2],[2,3]]],
+/*Aql*/[[[19.85,8.87,0.76],[19.77,10.61,2.72],[19.92,6.41,3.71]],[[1,0],[0,2]]],
+/*Sco*/[[[16.49,-26.43,1.06,1],[16.00,-22.62,2.29],[16.09,-19.81,2.56],[15.98,-26.11,2.89],[16.84,-34.29,2.29],[16.91,-42.36,3.62],[17.20,-43.24,3.33],[17.62,-43.00,1.86],[17.56,-37.10,1.62]],[[2,1],[3,1],[1,0],[0,4],[4,5],[5,6],[6,7],[7,8]]],
+/*Tau*/[[[4.60,16.51,0.87,1],[5.44,28.61,1.68],[5.63,21.14,3.01],[4.33,15.63,3.65],[4.48,19.18,3.53]],[[3,0],[0,2],[3,4],[4,1]]],
+/*Gem*/[[[7.76,28.03,1.14,1],[7.58,31.89,1.58],[6.63,16.40,1.93],[7.34,21.98,3.53],[6.73,25.13,2.98],[6.38,22.51,2.87]],[[0,3],[3,2],[1,4],[4,5]]],
+/*CMa*/[[[6.75,-16.72,-1.46],[6.38,-17.96,1.98],[6.98,-28.97,1.50],[7.14,-26.39,1.84],[7.40,-29.30,2.45]],[[1,0],[0,3],[3,2],[3,4]]],
+/*CMi*/[[[7.66,5.22,0.34],[7.45,8.29,2.89]],[[1,0]]],
+/*Leo*/[[[10.14,11.97,1.35],[10.12,16.76,3.51],[10.33,19.84,2.28],[11.24,20.52,2.56],[11.82,14.57,2.14],[11.24,15.43,3.33],[10.28,23.42,3.44],[9.88,26.01,3.88],[9.76,23.77,2.98]],[[0,1],[1,2],[2,6],[6,7],[7,8],[2,3],[3,4],[4,5],[5,0]]],
+/*Boo*/[[[14.26,19.18,-0.05,1],[14.75,27.07,2.35],[13.91,18.40,2.68],[14.53,38.31,3.04],[15.03,40.39,3.49],[15.26,33.31,3.49]],[[2,0],[0,1],[1,5],[5,4],[4,3],[3,0]]],
+/*Vir*/[[[13.42,-11.16,0.98],[12.69,-1.45,2.74],[13.04,10.96,2.85]],[[0,1],[1,2]]],
+/*Aur*/[[[5.28,46.00,0.08,1],[6.00,44.95,1.90],[6.00,37.21,2.65],[4.95,33.17,2.69],[5.44,28.61,1.68]],[[0,1],[1,2],[2,4],[4,3],[3,0]]],
+/*Peg+And*/[[[23.08,15.21,2.49],[23.06,28.08,2.42],[0.22,15.18,2.83],[0.14,29.09,2.06],[1.16,35.62,2.05,1],[2.06,42.33,2.26]],[[0,1],[1,3],[3,2],[2,0],[3,4],[4,5]]],
+/*Per*/[[[3.41,49.86,1.79],[3.14,40.96,2.12]],[[0,1]]],
+/*UMi*/[[[2.53,89.26,1.98],[14.85,74.16,2.08,1],[15.35,71.83,3.05],[17.54,86.59,4.36],[16.77,82.04,4.23],[15.73,77.79,4.32]],[[0,3],[3,4],[4,5],[5,1],[1,2],[2,5]]],
+/*Cru+Cen*/[[[12.44,-63.10,0.77],[12.79,-59.69,1.25],[12.52,-57.11,1.64,1],[12.25,-58.75,2.79],[14.66,-60.83,-0.27],[14.06,-60.37,0.61]],[[0,2],[1,3],[4,5]]]];
+/* lone beacons: Fomalhaut, Canopus, Achernar, Alphecca */
+const LONERS=[[22.96,-29.62,1.16],[6.40,-52.70,-0.74],[1.63,-57.24,0.46],[15.58,26.72,2.23]];
+let skyMats=[];
+(function buildSky(){
+  const bright=[],mid=[],faint=[],linePts=[];
+  const addStar=s=>{const rec={v:radec(s[0],s[1]),warm:!!s[3]};
+    (s[2]<1.1?bright:s[2]<2.4?mid:faint).push(rec);return rec.v;};
+  for(const[stars,links]of CONSTS){
+    const vs=stars.map(addStar);
+    for(const[a,b]of links)linePts.push(vs[a].clone().multiplyScalar(0.996),vs[b].clone().multiplyScalar(0.996));}
+  for(const s of LONERS)addStar(s);
+  const COOL=new THREE.Color(0xdfe9ff),WARM=new THREE.Color(0xffcf9a);
+  function starPoints(arr,size,op){
+    const pos=new Float32Array(arr.length*3),col=new Float32Array(arr.length*3);
+    arr.forEach((r,i)=>{pos[3*i]=r.v.x;pos[3*i+1]=r.v.y;pos[3*i+2]=r.v.z;
+      const c=r.warm?WARM:COOL;col[3*i]=c.r;col[3*i+1]=c.g;col[3*i+2]=c.b;});
+    const g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    g.setAttribute('color',new THREE.BufferAttribute(col,3));
+    const m=new THREE.PointsMaterial({map:GLOWTEX,size,vertexColors:true,transparent:true,
+     opacity:op,depthWrite:false,blending:THREE.AdditiveBlending,fog:false});
+    const p=new THREE.Points(g,m);p.frustumCulled=false;skyRot.add(p);skyMats.push(m);return m;}
+  starPoints(bright,0.95,1.0);
+  starPoints(mid,0.55,0.95);
+  starPoints(faint,0.36,0.85);
+  /* constellation figure lines are intentionally not drawn — the sky is a plain starfield */
+  void linePts;
+  /* anonymous background stars */
+  {const N=800,pos=new Float32Array(N*3);
+   for(let i=0;i<N;i++){const v=randDir(SKY_R*(0.97+Math.random()*0.02));
+    pos[3*i]=v.x;pos[3*i+1]=v.y;pos[3*i+2]=v.z;}
+   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+   const m=new THREE.PointsMaterial({map:GLOWTEX,color:0xaebfda,size:0.22,transparent:true,
+    opacity:0.55,depthWrite:false,blending:THREE.AdditiveBlending,fog:false});
+   const p=new THREE.Points(g,m);p.frustumCulled=false;skyRot.add(p);}
+  /* the Milky Way: a soft band around the galactic plane */
+  {const N=650,pos=new Float32Array(N*3);
+   const n=radec(12.85,27.13).normalize();                      // north galactic pole
+   const u=new THREE.Vector3(0,1,0).cross(n).normalize();
+   const v=new THREE.Vector3().crossVectors(n,u);
+   for(let i=0;i<N;i++){const ph=Math.random()*6.28319;
+    const off=(Math.random()+Math.random()+Math.random()-1.5)*0.18;
+    const d=u.clone().multiplyScalar(Math.cos(ph)).addScaledVector(v,Math.sin(ph))
+      .multiplyScalar(Math.cos(off)).addScaledVector(n,Math.sin(off));
+    pos[3*i]=d.x*SKY_R*0.985;pos[3*i+1]=d.y*SKY_R*0.985;pos[3*i+2]=d.z*SKY_R*0.985;}
+   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+   const m=new THREE.PointsMaterial({map:GLOWTEX,color:0x7f95c8,size:0.5,transparent:true,
+    opacity:0.20,depthWrite:false,blending:THREE.AdditiveBlending,fog:false});
+   const p=new THREE.Points(g,m);p.frustumCulled=false;skyRot.add(p);}
+  /* wandering stars: Venus, Mars, Jupiter, Saturn on the ecliptic (indicative positions) */
+  const PLANETS=[[3.30,18.0,0xfff1cf,1.5],[8.60,20.0,0xff9a6e,0.8],[12.40,-2.0,0xffe9c0,1.2],[22.40,-11.5,0xf2e2b6,0.95]];
+  for(const[ra,dec,c,s]of PLANETS){
+    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:GLOWTEX,color:c,transparent:true,
+     opacity:0.95,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}));
+    sp.position.copy(radec(ra,dec));sp.scale.set(s,s,1);skyRot.add(sp);}
+})();
+
+/* (floor constellation chart removed on request — the sky keeps its plain starfield) */
+
+/* falling stars: a small recycled pool of luminous chords */
+const METEORS=[];
+for(let i=0;i<3;i++){
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(6),3));
+  g.setAttribute('color',new THREE.BufferAttribute(new Float32Array(6),3));
+  const l=new THREE.Line(g,new THREE.LineBasicMaterial({vertexColors:true,transparent:true,
+   opacity:1,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}));
+  l.frustumCulled=false;l.visible=false;scene.add(l);
+  METEORS.push({l,t:0,dur:1,p0:new THREE.Vector3(),dir:new THREE.Vector3(),active:false});
+}
+let meteorIn=5;
+function spawnMeteor(){
+  const m=METEORS.find(m=>!m.active); if(!m)return;
+  const az=Math.random()*6.28319, alt=0.45+Math.random()*0.75;   // 25°–70° up
+  m.p0.set(Math.cos(alt)*Math.cos(az),Math.sin(alt),Math.cos(alt)*Math.sin(az)).multiplyScalar(SKY_R*0.97);
+  const t=randDir(1);
+  m.dir.crossVectors(m.p0,t).normalize().multiplyScalar(15+Math.random()*8);
+  if(m.dir.y>0)m.dir.multiplyScalar(-1);                          // they fall
+  m.t=0;m.dur=0.55+Math.random()*0.4;m.active=true;m.l.visible=true;
+}
+function updateSky(dt,tt){
+  skyRot.rotation.y+=dt*0.006;                                    // slow sidereal drift
+  if(skyMats[1])skyMats[1].opacity=0.86+0.09*Math.sin(tt*2.7);    // gentle twinkle
+  if(skyMats[2])skyMats[2].opacity=0.74+0.11*Math.sin(tt*3.3+1.7);
+  meteorIn-=dt; if(meteorIn<=0){spawnMeteor();meteorIn=4+Math.random()*8;}
+  for(const m of METEORS){
+    if(!m.active)continue;
+    m.t+=dt; const u=m.t/m.dur;
+    if(u>=1){m.active=false;m.l.visible=false;continue;}
+    const P=m.l.geometry.attributes.position.array,
+          C=m.l.geometry.attributes.color.array,
+          k=Math.sin(u*Math.PI), tail=Math.max(0,u-0.22);
+    P[0]=m.p0.x+m.dir.x*u;   P[1]=m.p0.y+m.dir.y*u;   P[2]=m.p0.z+m.dir.z*u;
+    P[3]=m.p0.x+m.dir.x*tail;P[4]=m.p0.y+m.dir.y*tail;P[5]=m.p0.z+m.dir.z*tail;
+    C[0]=0.95*k;C[1]=k;C[2]=k; C[3]=0;C[4]=0;C[5]=0;
+    m.l.geometry.attributes.position.needsUpdate=true;
+    m.l.geometry.attributes.color.needsUpdate=true;
+  }
+}
+
+/* drifting ambient dust (Hashgraph particle haze) */
+const dust=(()=>{const N=520,g=new THREE.BufferGeometry(),a=new Float32Array(N*3);
+for(let i=0;i<N;i++){const r=1.5+Math.random()*9.5,t=Math.random()*6.283;
+ a[3*i]=r*Math.cos(t);a[3*i+1]=-1+Math.random()*5.6;a[3*i+2]=r*Math.sin(t);}
+g.setAttribute('position',new THREE.BufferAttribute(a,3));
+const p=new THREE.Points(g,new THREE.PointsMaterial({map:GLOWTEX,color:0x5e8bff,size:0.04,
+ transparent:true,opacity:0.22,depthWrite:false,blending:THREE.AdditiveBlending}));
+scene.add(p);return p;})();
+
+/* ---------- holographic floor ---------- */
+const grid=new THREE.PolarGridHelper(14,24,8,96,0x2a4d8f,0x16294f);
+grid.position.y=-1.1;
+grid.material.transparent=true; grid.material.opacity=0.35; grid.material.depthWrite=false;
+scene.add(grid);
+for(const rr of [2.2,4.6,7.5]){
+ const ring=new THREE.Mesh(new THREE.TorusGeometry(rr,0.012,6,96),holo(0x2f6fbf,0.30,false));
+ ring.rotation.x=Math.PI/2; ring.position.y=-1.09; scene.add(ring);}
+
+/* ---------- holographic temple — real Ionic order ---------- */
+const COLR=9.4,NCOL=12;
+/* fluted shaft: a dense cage of parallel vertical lines (24 flutes, as in the photo) */
+const NF=24, flutePos=new Float32Array(NF*6);
+for(let k=0;k<NF;k++){const b=k/NF*Math.PI*2;
+ flutePos[6*k]  =Math.cos(b)*0.27; flutePos[6*k+1]= 2.3; flutePos[6*k+2]=Math.sin(b)*0.27;
+ flutePos[6*k+3]=Math.cos(b)*0.34; flutePos[6*k+4]=-2.3; flutePos[6*k+5]=Math.sin(b)*0.34;}
+const fluteGeo=new THREE.BufferGeometry();
+fluteGeo.setAttribute('position',new THREE.BufferAttribute(flutePos,3));
+const fluteMat=new THREE.LineBasicMaterial({color:0x4d8fe0,transparent:true,opacity:0.25,depthWrite:false,blending:THREE.AdditiveBlending});
+holoMats.push({m:fluteMat,base:0.25,ph:Math.random()*6.28});
+/* Ionic capital after the reference photo: echinus, horizontal roll joining
+   two mirrored scroll volutes (outer torus + inner coil), then the abacus */
+const voluteGeo=new THREE.TorusGeometry(0.13,0.045,8,26);
+const voluteInGeo=new THREE.TorusGeometry(0.055,0.020,6,18);   // inner turn of the scroll
+const rollGeo=new THREE.CylinderGeometry(0.045,0.045,0.52,8,1,true);
+const echinusGeo=new THREE.CylinderGeometry(0.30,0.24,0.12,12,1,true);
+const abacusGeo=new THREE.BoxGeometry(0.86,0.09,0.56);
+const collarGeo=new THREE.TorusGeometry(0.29,0.018,6,28);      // astragal rings on the shaft
+const moldGeo=new THREE.TorusGeometry(0.40,0.045,8,28);        // base torus molding
+const colBaseGeo=new THREE.BoxGeometry(1.0,0.22,1.0);
+const volMat=holo(0x6fb9ff,0.32), echMat=holo(0x4d8fe0,0.18),
+      abaMat=holo(0x3a6fd0,0.20), colBaseMat=holo(0x2a4d9f,0.18);
+for(let i=0;i<NCOL;i++){const a=i/NCOL*Math.PI*2+Math.PI/NCOL;
+ const x=COLR*Math.cos(a),z=COLR*Math.sin(a);
+ const g=new THREE.Group(); g.position.set(x,1.2,z); g.rotation.y=-a; // capital faces the center
+ g.add(new THREE.LineSegments(fluteGeo,fluteMat));
+ /* stepped base: square plinth + torus molding + astragal, as in the photo */
+ const base=new THREE.Mesh(colBaseGeo,colBaseMat); base.position.y=-2.2; g.add(base);
+ const mold=new THREE.Mesh(moldGeo,echMat); mold.rotation.x=Math.PI/2; mold.position.y=-2.04; g.add(mold);
+ const cB=new THREE.Mesh(collarGeo,volMat); cB.rotation.x=Math.PI/2; cB.position.y=-1.93; g.add(cB);
+ const cT=new THREE.Mesh(collarGeo,volMat); cT.rotation.x=Math.PI/2; cT.position.y=2.22; g.add(cT);
+ /* capital */
+ const ech=new THREE.Mesh(echinusGeo,echMat); ech.position.y=2.36; g.add(ech);
+ const roll=new THREE.Mesh(rollGeo,echMat); roll.rotation.z=Math.PI/2; roll.position.y=2.52; g.add(roll);
+ for(const s of [-1,1]){
+  const v=new THREE.Mesh(voluteGeo,volMat); v.position.set(0.30*s,2.52,0); v.rotation.y=0.18*s; g.add(v);
+  const vi=new THREE.Mesh(voluteInGeo,volMat); vi.position.set(0.30*s,2.50,0.02*s); vi.rotation.y=0.18*s; g.add(vi);}
+ const aba=new THREE.Mesh(abacusGeo,abaMat); aba.position.y=2.66; g.add(aba);
+ const beacon=new THREE.Sprite(new THREE.SpriteMaterial({map:GLOWTEX,color:0x5e9fff,transparent:true,opacity:0.35,depthWrite:false,blending:THREE.AdditiveBlending}));
+ beacon.scale.set(0.5,0.5,1); beacon.position.y=2.76; g.add(beacon);
+ scene.add(g);}
+/* (votive steles removed — the eight relations live inside the sphere and on the
+    floor chart; the ring is left clear so the observatory reads less cluttered) */
+/* crepidoma: three stepped platforms under the whole temple */
+for(let i=0;i<3;i++){
+ const step=new THREE.Mesh(new THREE.CylinderGeometry(11.0+i*0.8,11.0+i*0.8,0.16,64,1,true),holo(0x2a4d9f,0.10));
+ step.position.y=-1.18-i*0.16; scene.add(step);}
+/* entablature: architrave + triglyph frieze + cornice */
+const architrave=new THREE.Mesh(new THREE.TorusGeometry(COLR,0.20,4,96),holo(0x3a6fd0,0.10));
+architrave.rotation.x=Math.PI/2; architrave.position.y=3.98; scene.add(architrave);
+const frz=[], FRN=192;
+for(let k=0;k<FRN;k++){ if(k%4===3)continue;      // triglyph rhythm: 3 strokes, one gap
+ const b=k/FRN*Math.PI*2, c=Math.cos(b)*COLR, s=Math.sin(b)*COLR;
+ frz.push(c,4.16,s, c,4.42,s);}
+const friezeGeo=new THREE.BufferGeometry();
+friezeGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(frz),3));
+const friezeMat=new THREE.LineBasicMaterial({color:0x3f7fd8,transparent:true,opacity:0.22,depthWrite:false,blending:THREE.AdditiveBlending});
+holoMats.push({m:friezeMat,base:0.22,ph:Math.random()*6.28});
+scene.add(new THREE.LineSegments(friezeGeo,friezeMat));
+const cornice=new THREE.Mesh(new THREE.TorusGeometry(COLR+0.25,0.10,4,96),holo(0x4d8fe0,0.12));
+cornice.rotation.x=Math.PI/2; cornice.position.y=4.55; scene.add(cornice);
+/* coffered dome + radial ribs + oculus */
+const domeTheta=Math.PI/2.55, domeFlat=0.62;
+const dome=new THREE.Mesh(new THREE.SphereGeometry(9.6,36,16,0,Math.PI*2,0.12,domeTheta-0.12),holo(0x2f5f9f,0.09));
+dome.scale.y=domeFlat;
+dome.position.y=4.62-9.6*domeFlat*Math.cos(domeTheta); scene.add(dome);
+const ribMat=new THREE.LineBasicMaterial({color:0x4d8fe0,transparent:true,opacity:0.26,depthWrite:false,blending:THREE.AdditiveBlending});
+holoMats.push({m:ribMat,base:0.26,ph:Math.random()*6.28});
+for(let r=0;r<12;r++){const a=r/12*Math.PI*2, pts=[];
+ for(let k=0;k<=16;k++){const th=0.12+(domeTheta-0.12)*(k/16);
+  const rr=9.6*Math.sin(th), y=dome.position.y+9.6*domeFlat*Math.cos(th);
+  pts.push(new THREE.Vector3(rr*Math.cos(a),y,rr*Math.sin(a)));}
+ scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),ribMat));}
+const oculus=new THREE.Mesh(new THREE.TorusGeometry(9.6*Math.sin(0.12),0.02,6,48),holo(0x6fb9ff,0.30,false));
+oculus.rotation.x=Math.PI/2; oculus.position.y=dome.position.y+9.6*domeFlat*Math.cos(0.12); scene.add(oculus);
+const alTex=(()=>{const c=document.createElement('canvas');c.width=512;c.height=96;const g=c.getContext('2d');
+g.font="52px 'Cormorant Garamond',Georgia,serif";g.fillStyle='#7fd8ff';g.shadowColor='#4d9fff';g.shadowBlur=18;g.textAlign='center';
+g.fillText('ΑΛΗΘΕΙΑ',256,64);
+const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;})();
+const alSpr=new THREE.Sprite(new THREE.SpriteMaterial({map:alTex,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
+alSpr.scale.set(3.6,0.68,1); alSpr.position.set(0,5.15,-8.7); scene.add(alSpr);
+
+/* ---------- the sacred tripod — a brazier of living fire (pure architecture, no statue) ---------- */
+const brazier=new THREE.Group(); brazier.position.set(0,-1.1,-4.2); scene.add(brazier);
+const legMat=holo(0x4d8fe0,0.30), bowlMat=holo(0x6fb9ff,0.26);
+const legGeo=new THREE.CylinderGeometry(0.035,0.05,1.65,6,1,true);
+for(let i=0;i<3;i++){const a=i/3*Math.PI*2;
+ const leg=new THREE.Mesh(legGeo,legMat);
+ leg.position.set(Math.cos(a)*0.34,0.82,Math.sin(a)*0.34);
+ leg.quaternion.setFromAxisAngle(new THREE.Vector3(-Math.sin(a),0,Math.cos(a)),0.11);
+ brazier.add(leg);}
+const ringU=new THREE.Mesh(new THREE.TorusGeometry(0.30,0.018,6,24),bowlMat);
+ringU.rotation.x=Math.PI/2; ringU.position.y=1.58; brazier.add(ringU);
+const bowl=new THREE.Mesh(new THREE.CylinderGeometry(0.52,0.28,0.30,16,1,true),bowlMat);
+bowl.position.y=1.78; brazier.add(bowl);
+const rimT=new THREE.Mesh(new THREE.TorusGeometry(0.52,0.02,6,32),holo(0xffb347,0.4,false));
+rimT.rotation.x=Math.PI/2; rimT.position.y=1.93; brazier.add(rimT);
+const coals=new THREE.Sprite(new THREE.SpriteMaterial({map:GLOWTEX,color:0xff8a2a,transparent:true,opacity:0.6,depthWrite:false,blending:THREE.AdditiveBlending}));
+coals.scale.set(0.9,0.5,1); coals.position.y=1.92; brazier.add(coals);
+const FLAME=new THREE.Vector3(0,0.88,-4.2);   // world position of the fire
+const flames=[];
+for(let i=0;i<16;i++){const f=new THREE.Sprite(new THREE.SpriteMaterial({map:GLOWTEX,color:i%3?0xffa23c:0xffd27a,transparent:true,opacity:0.8,depthWrite:false,blending:THREE.AdditiveBlending}));
+ f.scale.set(0.22,0.34,1); f.position.copy(FLAME); f.userData={ph:Math.random()*6.28,sp:0.5+Math.random()*0.8};
+ scene.add(f); flames.push(f);}
+
+/* ---------- holographic altar — monumental, hosting the hidden state ---------- */
+const alt1=new THREE.Mesh(new THREE.CylinderGeometry(1.25,1.40,0.35,24,1,true),holo(0x2f6fbf,0.25)); alt1.position.y=-0.92;
+const alt2=new THREE.Mesh(new THREE.CylinderGeometry(0.92,1.05,1.40,24,3,true),holo(0x3a7fd0,0.20)); alt2.position.y=-0.05;
+const alt3=new THREE.Mesh(new THREE.CylinderGeometry(1.10,0.95,0.20,24,1,true),holo(0x4d8fe0,0.28)); alt3.position.y=0.76;
+scene.add(alt1,alt2,alt3);
+/* greek-key band around the altar drum */
+(function(){const pts=[],N=64;
+ for(let k=0;k<=N;k++){const b=k/N*Math.PI*2, up=(k%4<2)?0.36:0.14;
+  pts.push(new THREE.Vector3(Math.cos(b)*1.02,up,Math.sin(b)*1.02));}
+ const m=new THREE.LineBasicMaterial({color:0x6fb9ff,transparent:true,opacity:0.35,depthWrite:false,blending:THREE.AdditiveBlending});
+ holoMats.push({m,base:0.35,ph:Math.random()*6.28});
+ scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),m));})();
+
+/* ---------- PLEXUS — the hidden state, raging inside the altar ---------- */
+const PLX_N=250, PLX_R=0.80, PLX_LINK=0.30, PLX_MAXSEG=1100;
+const plx=[]; for(let i=0;i<PLX_N;i++){const r=Math.sqrt(Math.random())*PLX_R,t=Math.random()*6.283;
+ plx.push({bx:r*Math.cos(t),bz:r*Math.sin(t),by:-0.70+Math.random()*1.45,
+  ph:Math.random()*6.28,sp:0.7+Math.random()*0.9,x:0,y:0,z:0});}
+const plxGeo=new THREE.BufferGeometry();
+plxGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(PLX_N*3),3));
+const plxPts=new THREE.Points(plxGeo,new THREE.PointsMaterial({map:GLOWTEX,color:0x8fc4ff,size:0.05,
+ transparent:true,opacity:0.85,depthWrite:false,blending:THREE.AdditiveBlending}));
+plxPts.frustumCulled=false; scene.add(plxPts);
+const segGeo=new THREE.BufferGeometry();
+segGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(PLX_MAXSEG*6),3));
+segGeo.setAttribute('color',new THREE.BufferAttribute(new Float32Array(PLX_MAXSEG*6),3));
+const segLines=new THREE.LineSegments(segGeo,new THREE.LineBasicMaterial({vertexColors:true,
+ transparent:true,opacity:0.85,depthWrite:false,blending:THREE.AdditiveBlending}));
+segLines.frustumCulled=false; scene.add(segLines);
+const PLX_COL=new THREE.Color(0x4d7fe0);
+function updatePlexus(tt){
+  const pp=plxGeo.attributes.position.array;
+  for(let i=0;i<PLX_N;i++){const p=plx[i];
+    p.x=p.bx+0.20*Math.sin(tt*p.sp+p.ph);
+    p.z=p.bz+0.20*Math.cos(tt*p.sp*0.9+p.ph);
+    p.y=p.by+0.12*Math.sin(tt*p.sp*1.3+p.ph);
+    pp[3*i]=p.x; pp[3*i+1]=p.y; pp[3*i+2]=p.z;}
+  plxGeo.attributes.position.needsUpdate=true;
+  const sp=segGeo.attributes.position.array, sc=segGeo.attributes.color.array;
+  let n=0;
+  for(let i=0;i<PLX_N&&n<PLX_MAXSEG;i++)for(let j=i+1;j<PLX_N&&n<PLX_MAXSEG;j++){
+    const a=plx[i],b=plx[j];
+    const dx=a.x-b.x,dy=a.y-b.y,dz=a.z-b.z,d2=dx*dx+dy*dy+dz*dz;
+    if(d2<PLX_LINK*PLX_LINK){
+      const al=(1-Math.sqrt(d2)/PLX_LINK)*0.55;
+      const k=6*n;
+      sp[k]=a.x;sp[k+1]=a.y;sp[k+2]=a.z; sp[k+3]=b.x;sp[k+4]=b.y;sp[k+5]=b.z;
+      sc[k]=PLX_COL.r*al;sc[k+1]=PLX_COL.g*al;sc[k+2]=PLX_COL.b*al;
+      sc[k+3]=sc[k];sc[k+4]=sc[k+1];sc[k+5]=sc[k+2];
+      n++;}}
+  segGeo.setDrawRange(0,n*2);
+  segGeo.attributes.position.needsUpdate=true;
+  segGeo.attributes.color.needsUpdate=true;
+}
+
+/* ---------- vertical axis beam: hidden state -> sphere ---------- */
+const BEAM_Y0=0.92;   // born at the altar top, tip = the quantum sphere
+const beam=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.10,CORE_Y-BEAM_Y0,10,1,true),
+ holo(0x6fb9ff,0.18,false));
+beam.position.y=(CORE_Y+BEAM_Y0)/2; scene.add(beam);
+const beamCore=new THREE.Line(
+ new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,BEAM_Y0,0),new THREE.Vector3(0,CORE_Y,0)]),
+ new THREE.LineBasicMaterial({color:0xbfe4ff,transparent:true,opacity:0.7,depthWrite:false,blending:THREE.AdditiveBlending}));
+scene.add(beamCore);
+const beamGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:GLOWTEX,color:0x8fc4ff,transparent:true,opacity:0.6,depthWrite:false,blending:THREE.AdditiveBlending}));
+beamGlow.scale.set(1.1,1.1,1); beamGlow.position.set(0,BEAM_Y0+0.05,0); scene.add(beamGlow);
+
+/* ---------- QUANTUM PARTICLE SPHERE (the model) ---------- */
+const sphereGrp=new THREE.Group(); sphereGrp.position.y=CORE_Y; scene.add(sphereGrp);
+function particleShell(N,rMin,rMax,size,c1,c2,op){
+  const g=new THREE.BufferGeometry();
+  const pos=new Float32Array(N*3), col=new Float32Array(N*3);
+  const A=new THREE.Color(c1),B=new THREE.Color(c2),C=new THREE.Color();
+  for(let i=0;i<N;i++){
+    const v=randDir(1).multiplyScalar(rMin+(rMax-rMin)*Math.random());
+    pos[3*i]=v.x;pos[3*i+1]=v.y;pos[3*i+2]=v.z;
+    C.copy(A).lerp(B,Math.random()); if(Math.random()<0.02)C.setHex(0xffffff);
+    col[3*i]=C.r;col[3*i+1]=C.g;col[3*i+2]=C.b;}
+  g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  g.setAttribute('color',new THREE.BufferAttribute(col,3));
+  const p=new THREE.Points(g,new THREE.PointsMaterial({map:GLOWTEX,size,vertexColors:true,
+   transparent:true,opacity:op,depthWrite:false,blending:THREE.AdditiveBlending}));
+  sphereGrp.add(p); return p;
+}
+const shellA=particleShell(4600,SR*0.94,SR*1.02,0.030,0x3f6fd8,0x9fdcff,0.85); // crisp shell
+const shellB=particleShell(1900,SR*0.25,SR*0.92,0.024,0x2a4d9f,0x6fb9ff,0.5);  // inner volume
+const cage=new THREE.Mesh(new THREE.IcosahedronGeometry(SR*1.02,2),holo(0x3a6fd0,0.05));
+sphereGrp.add(cage);
+const centerGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:GLOWTEX,color:0x9fdcff,transparent:true,opacity:0.4,depthWrite:false,blending:THREE.AdditiveBlending}));
+centerGlow.scale.set(2.0,2.0,1); sphereGrp.add(centerGlow);
+
+/* ---------- the measured axes, living inside the sphere ---------- */
+const axesGrp=new THREE.Group(); axesGrp.position.y=CORE_Y; axesGrp.scale.setScalar(0.001); scene.add(axesGrp);
+function labelSprite(txt,color){const c=document.createElement('canvas');c.width=256;c.height=64;const g=c.getContext('2d');
+g.font="26px 'JetBrains Mono',Consolas,monospace";g.fillStyle=color;g.shadowColor=color;g.shadowBlur=12;g.fillText(txt,8,40);
+const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;
+const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false}));
+s.scale.set(0.92,0.23,1);return s;}
+const axes={};
+DATA.cats.forEach(id=>{
+  const col=COLORS[id];
+  const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3(0,R,0)]),
+   new THREE.LineBasicMaterial({color:col,transparent:true,opacity:0.85,depthWrite:false,blending:THREE.AdditiveBlending}));
+  const tip=new THREE.Mesh(new THREE.SphereGeometry(0.05,14,14),new THREE.MeshBasicMaterial({color:col}));
+  const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:GLOWTEX,color:col,transparent:true,opacity:0.55,depthWrite:false,blending:THREE.AdditiveBlending}));
+  glow.scale.set(0.34,0.34,1);
+  const lab=labelSprite(id,'#'+col.toString(16).padStart(6,'0'));
+  axesGrp.add(line,tip,glow,lab);
+  axes[id]={line,tip,glow,lab,cur:new THREE.Vector3(0,1,0)};
+});
+const rings=[];
+function shockwave(worldDir,col){const ring=new THREE.Mesh(new THREE.RingGeometry(0.15,0.19,48),
+ new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.9,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending}));
+ ring.position.y=CORE_Y; ring.lookAt(worldDir.clone().add(new THREE.Vector3(0,CORE_Y,0))); scene.add(ring); rings.push({m:ring,t:0});}
+function targetVec(id){
+  const i=DATA.cats.indexOf(id);
+  const e=DATA.coords[model+"_early"][i], p=DATA.coords[model+"_peak"][i];
+  const v=new THREE.Vector3(e[0]+(p[0]-e[0])*depth, e[1]+(p[1]-e[1])*depth, e[2]+(p[2]-e[2])*depth);
+  if(v.lengthSq()<1e-4)v.set(0,1,0);
+  return v.normalize();
+}
+function updateAxes(dt){
+  DATA.cats.forEach(id=>{
+    const a=axes[id], tv=targetVec(id);
+    a.cur.lerp(tv,1-Math.pow(0.0018,dt)).normalize();
+    const end=a.cur.clone().multiplyScalar(R);
+    a.line.geometry.setFromPoints([new THREE.Vector3(),end]);
+    a.tip.position.copy(end); a.glow.position.copy(end);
+    a.lab.position.copy(a.cur.clone().multiplyScalar(R+0.27));
+    const on=(id===selected);
+    a.line.material.opacity=on?1:0.55; a.glow.material.opacity=on?0.95:0.35;
+    a.glow.scale.setScalar(on?0.55+0.09*Math.sin(performance.now()/180):0.34);
+  });
+}
+function worldAxisDir(id){return axes[id].cur.clone().applyQuaternion(axesGrp.quaternion);}
+
+/* ---------- particle flows ---------- */
+function makeFlow(N,size){
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(N*3),3));
+  g.setAttribute('color',new THREE.BufferAttribute(new Float32Array(N*3),3));
+  const m=new THREE.PointsMaterial({map:GLOWTEX,size,sizeAttenuation:true,transparent:true,
+   vertexColors:true,depthWrite:false,blending:THREE.AdditiveBlending});
+  const p=new THREE.Points(g,m); p.frustumCulled=false; scene.add(p);
+  return {pts:p,pos:g.attributes.position,col:g.attributes.color,N};
+}
+/* attention inflow: context spirals in toward the hidden state (plexus) */
+const AT=makeFlow(1150,0.05);  // thick vortex, absorbed by the hidden state
+const atP=[]; for(let i=0;i<AT.N;i++)atP.push({t:Math.random(),a:Math.random()*6.283,
+ r:3.6+Math.random()*4.4,y:-0.8+Math.random()*2.6,sp:0.10+Math.random()*0.10});
+const AT_COL=new THREE.Color(0x2b66ff), AT_HI=new THREE.Color(0x8fc4ff); // electric blue, same family as the plexus
+function updateAttention(dt){
+  for(let i=0;i<AT.N;i++){const p=atP[i];
+    p.t+=dt*p.sp; if(p.t>=1){p.t=0;p.a=Math.random()*6.283;p.r=3.6+Math.random()*4.4;p.y=-0.8+Math.random()*2.6;}
+    const u=p.t, r=p.r*(1-u*u)+0.15, ang=p.a+u*3.6;
+    AT.pos.array[3*i]=r*Math.cos(ang);
+    AT.pos.array[3*i+1]=p.y+(0.22-p.y)*u;
+    AT.pos.array[3*i+2]=r*Math.sin(ang);
+    const k=Math.sin(u*Math.PI);
+    const c=AT_COL.clone().lerp(AT_HI,u*0.7).multiplyScalar(0.85*k);
+    AT.col.array[3*i]=c.r; AT.col.array[3*i+1]=c.g; AT.col.array[3*i+2]=c.b;}
+  AT.pos.needsUpdate=true; AT.col.needsUpdate=true;
+}
+/* risers: information climbing the beam into the sphere */
+const RS=makeFlow(240,0.05);
+const rsP=[]; for(let i=0;i<RS.N;i++)rsP.push({t:Math.random(),ph:Math.random()*6.283,sp:0.25+Math.random()*0.25});
+const RS_COL=new THREE.Color(0x9fdcff);
+function updateRisers(dt){
+  for(let i=0;i<RS.N;i++){const p=rsP[i];
+    p.t+=dt*p.sp; if(p.t>=1){p.t=0;p.ph=Math.random()*6.283;}
+    const u=p.t, rad=0.10+0.04*Math.sin(u*9);
+    RS.pos.array[3*i]=Math.cos(p.ph+u*8)*rad;
+    RS.pos.array[3*i+1]=BEAM_Y0+u*(CORE_Y-BEAM_Y0);
+    RS.pos.array[3*i+2]=Math.sin(p.ph+u*8)*rad;
+    const k=Math.sin(u*Math.PI)*0.8;
+    RS.col.array[3*i]=RS_COL.r*k; RS.col.array[3*i+1]=RS_COL.g*k; RS.col.array[3*i+2]=RS_COL.b*k;}
+  RS.pos.needsUpdate=true; RS.col.needsUpdate=true;
+}
+/* FFN write: jet erupting from the sphere along the selected measured axis;
+   emission rate scales with the measured FFN decode accuracy */
+const FF=makeFlow(420,0.06);
+const ffP=[]; for(let i=0;i<FF.N;i++)ffP.push({t:Math.random(),sp:0.5+Math.random()*0.5,
+ jx:(Math.random()-0.5),jy:(Math.random()-0.5),jz:(Math.random()-0.5)});
+const _ffc=new THREE.Color(), _ffd=new THREE.Vector3(), _ffj=new THREE.Vector3();
+function updateFFN(dt,revealScale){
+  const rate=parseFloat(DECODE[model].ffn)/100;           // 0.74 / 0.82 — measured
+  _ffd.copy(axes[selected].cur).applyQuaternion(axesGrp.quaternion);
+  _ffc.setHex(COLORS[selected]);
+  for(let i=0;i<FF.N;i++){const p=ffP[i];
+    p.t+=dt*p.sp*(0.4+rate); if(p.t>=1){p.t=0;p.jx=Math.random()-0.5;p.jy=Math.random()-0.5;p.jz=Math.random()-0.5;}
+    const u=p.t, len=0.35+u*2.4;
+    _ffj.set(p.jx,p.jy,p.jz).multiplyScalar(u*0.55);
+    FF.pos.array[3*i]=_ffd.x*len+_ffj.x;
+    FF.pos.array[3*i+1]=CORE_Y+_ffd.y*len+_ffj.y;
+    FF.pos.array[3*i+2]=_ffd.z*len+_ffj.z;
+    const k=revealScale*rate*Math.sin(u*Math.PI)*0.85;
+    FF.col.array[3*i]=_ffc.r*k; FF.col.array[3*i+1]=_ffc.g*k; FF.col.array[3*i+2]=_ffc.b*k;}
+  FF.pos.needsUpdate=true; FF.col.needsUpdate=true;
+}
+/* ---------- terminals ---------- */
+const theoP=document.getElementById('theoP'), codeP=document.getElementById('codeP');
+let typers=[];
+function typeInto(el,html,speed){typers=typers.filter(t=>{if(t.el===el){clearInterval(t.iv);return false;}return true;});
+const t={el,html,i:0};typers.push(t);el.innerHTML="";
+t.iv=setInterval(()=>{t.i+=2+Math.floor(Math.random()*3);if(t.i>=html.length){t.i=html.length;clearInterval(t.iv);}el.innerHTML=html.slice(0,t.i)+'<span style="opacity:.7">&#9608;</span>';},speed);}
+function fmt(x){const s=(x>=0?"+":"")+x.toFixed(2);return x<0?'<span class="neg">'+s+'</span>':'<span class="n">'+s+'</span>';}
+function cosOf(a,b,stage){const C=DATA.cos[model+"_"+stage];return C[DATA.cats.indexOf(a)][DATA.cats.indexOf(b)];}
+function theoryText(id){
+  const stage=depthTarget>0.5?"peak":"early";
+  const others=DATA.cats.filter(c=>c!==id);
+  const sorted=others.map(c=>[c,cosOf(id,c,stage)]).sort((x,y)=>y[1]-x[1]);
+  const ally=sorted[0], foe=sorted[sorted.length-1];
+  let L=[];
+  L.push('<span class="k">&gt; '+id+' &middot; '+NAMES[id]+'</span>   ['+(stage==="peak"?"PEAK":"BLOCK 2 &middot; lexical")+' / '+(model==="qwen"?"Qwen2.5-3B":"Llama-3.2-3B")+']');
+  L.push('&gt; strongest ally: '+ally[0]+' (cos '+fmt(ally[1])+')');
+  L.push('&gt; strongest opposition: '+foe[0]+' (cos '+fmt(foe[1])+')');
+  if(id==="P1412"||id==="P37"){const o=id==="P1412"?"P37":"P1412";
+    L.push('&gt; the merge: cos('+id+','+o+') = '+fmt(cosOf(id,o,"early"))+' at block 2 &rarr; '+fmt(cosOf(id,o,"peak"))+' at the peak.');
+    L.push('&gt; near anti-parallel lexically, one component functionally.');
+    L.push('&gt; the model re-files the concept: same move on both families.');}
+  if(id==="P30"){L.push('&gt; the antagonist: anti-aligned with the language block.');
+    L.push('&gt; its axis reads their truth backwards: transfer below chance.');}
+  if(id==="P27"){L.push('&gt; sides with geography at block 2, with the language block at the peak.');
+    L.push('&gt; the citizenship switch replicates across families (registered R4).');}
+  if(id==="P413"){L.push('&gt; the loner: near-orthogonal to everything, both depths.');}
+  if(id==="P176"&&model==="llama"){L.push('<span class="neg">&gt; ANOMALY: universal transfer 1.000 into this relation.</span>');
+    L.push('&gt; declared and excluded from R5 robustness (law holds without it).');}
+  if(id==="P495"){L.push('&gt; sides with the block; on Llama, cos +0.75 with citizenship.');}
+  L.push('&gt; arrangement law: peak arrangements of the two families agree');
+  L.push('&gt; at r = <span class="n">+0.770</span>, Mantel p = <span class="n">0.0009</span>. same knowledge, same geometry.');
+  return L.join("\n");
+}
+function codeText(id){
+  const D=DECODE[model];
+  return ['<span class="c"># per-category truth axis (label-free up to sign, Lemma 1)</span>',
+  '<span class="k">rows</span> = H[cat==<span class="n">"'+id+'"</span>][t] - H[cat==<span class="n">"'+id+'"</span>][f]',
+  '<span class="k">axis</span> = torch.linalg.svd(rows).Vh[<span class="n">0</span>]',
+  '<span class="k">axis</span> *= torch.sign(axis @ rows.mean(<span class="n">0</span>))  <span class="c"># true side +</span>',
+  '',
+  '<span class="c"># signed geometry @ this depth</span>',
+  'cos = axes @ axes.T',
+  '',
+  '<span class="c"># FFN write direction decodes the category:</span>',
+  '<span class="c">#   &Delta;f @ peak+1: '+D.ffn+'  vs lexical baseline '+D.lex+'</span>',
+  '<span class="c">#   (chance 12.5%, permutation p = 0.0099)</span>',
+  '',
+  'd = torch.load(<span class="n">"truth_dictionary.pt"</span>)',
+  'scores = states @ d[<span class="n">"axes"</span>].T  <span class="c"># K-direction monitor</span>'].join("\n");
+}
+function refreshTerms(){typeInto(theoP,theoryText(selected),14);typeInto(codeP,codeText(selected),10);}
+
+/* ---------- tablets, pulses, unveiling ---------- */
+const bench=document.getElementById('bench');
+DATA.cats.forEach(id=>{const b=document.createElement('button');b.className='ticket';b.id='tk_'+id;
+b.innerHTML='<b>'+id+'</b>'+NAMES[id];
+b.onclick=()=>{select(id,b);};bench.appendChild(b);});
+function firePulse(fromEl,toEl,color){
+  const a=fromEl.getBoundingClientRect(), b=toEl?toEl.getBoundingClientRect():{left:innerWidth/2,top:innerHeight*0.42,width:0,height:0};
+  const x1=a.left+a.width/2,y1=a.top,x2=b.left+b.width/2,y2=b.top+b.height/2;
+  const dot=document.createElement('div');dot.className='pulse';
+  dot.style.background=color;dot.style.boxShadow='0 0 14px 4px '+color;
+  document.body.appendChild(dot);
+  const midx=(x1+x2)/2, midy=Math.min(y1,y2)-80;
+  dot.style.left=x1+'px';dot.style.top=y1+'px';
+  dot.animate([{left:x1+'px',top:y1+'px'},{left:midx+'px',top:midy+'px'},{left:x2+'px',top:y2+'px',opacity:1},{left:x2+'px',top:y2+'px',opacity:0}],
+   {duration:620,easing:'cubic-bezier(.3,.8,.4,1)'}).onfinish=()=>dot.remove();
+}
+let revealed=false, revealT=0, glowKick=0;
+function unveil(){if(revealed)return;revealed=true;const h=document.getElementById('hint');if(h)h.remove();}
+function select(id,btn){selected=id;
+  document.querySelectorAll('.ticket').forEach(t=>t.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  const col='#'+COLORS[id].toString(16).padStart(6,'0');
+  const tk=document.getElementById('tk_'+id);
+  const _th=document.getElementById('theoT'), _co=document.getElementById('codeT');
+  if(_th.offsetParent)firePulse(tk,_th,col);
+  if(_co.offsetParent)firePulse(tk,_co,col);
+  firePulse(tk,null,col);
+  setTimeout(()=>{unveil(); shockwave(worldAxisDir(id).multiplyScalar(R),COLORS[id]);
+    glowKick=1; refreshTerms();},430);
+}
+
+/* ---------- controls ---------- */
+const slider=document.getElementById('depth');
+slider.oninput=()=>{depthTarget=slider.value/1000;};
+document.getElementById('mq').onclick=e=>{model="qwen";e.target.classList.add('on');document.getElementById('ml').classList.remove('on');refreshTerms();};
+document.getElementById('ml').onclick=e=>{model="llama";e.target.classList.add('on');document.getElementById('mq').classList.remove('on');refreshTerms();};
+let playing=false;
+document.getElementById('play').onclick=()=>{if(playing)return;
+  if(!revealed){select(selected,document.getElementById('tk_'+selected));}
+  playing=true;depthTarget=0;slider.value=0;
+  const t0=performance.now()+ (revealed?0:900);
+  (function step(){const u=(performance.now()-t0)/5200;
+    if(u<0){requestAnimationFrame(step);return;}
+    depthTarget=u<1?(1-Math.cos(Math.PI*Math.min(u,1)))/2:1;
+    slider.value=depthTarget*1000;
+    if(u<1)requestAnimationFrame(step);else{playing=false;refreshTerms();}})();};
+
+/* ---------- resize ---------- */
+function onResize(){
+  renderer.setSize(innerWidth,innerHeight,false);
+  cam.aspect=innerWidth/innerHeight; cam.updateProjectionMatrix();
+}
+addEventListener('resize',onResize); onResize();
+
+/* ---------- loop ---------- */
+let last=performance.now();
+function loop(now){const dt=Math.min((now-last)/1000,0.05);last=now;
+  const tt=now/1000;
+  depth+=(depthTarget-depth)*Math.min(1,dt*3.2);
+  controls.update();
+  // hologram flicker
+  for(const h of holoMats){let o=h.base*(0.90+0.10*Math.sin(tt*6+h.ph));
+    if(((tt*1.3+h.ph)%7)<0.06)o*=0.45; h.m.opacity=o;}
+  // the sacred fire on the tripod
+  flames.forEach(f=>{const u=(tt*f.userData.sp+f.userData.ph)%1;
+    f.position.set(FLAME.x+Math.sin(f.userData.ph*9+tt*2)*0.07,FLAME.y+u*0.85,FLAME.z+Math.cos(f.userData.ph*7+tt*2)*0.06);
+    f.material.opacity=0.8*(1-u); f.scale.setScalar(0.34*(1-u*0.6));});
+  dust.rotation.y+=dt*0.02;
+  updateSky(dt,tt);
+  // quantum sphere: organic rotation + pulse (axes group is NOT pulsed)
+  sphereGrp.rotation.y+=dt*0.07;
+  sphereGrp.rotation.x=0.12*Math.sin(tt*0.23);
+  sphereGrp.rotation.z=0.06*Math.sin(tt*0.17);
+  sphereGrp.scale.setScalar(1+0.035*Math.sin(tt*1.1));
+  shellA.material.opacity=0.78+0.10*Math.sin(tt*1.7);
+  shellB.material.opacity=0.42+0.14*Math.sin(tt*2.3+1.2);
+  glowKick=Math.max(0,glowKick-dt*1.2);
+  centerGlow.material.opacity=0.35+0.10*Math.sin(tt*1.5)+0.5*glowKick;
+  centerGlow.scale.setScalar(2.0+0.15*Math.sin(tt*1.5)+1.2*glowKick);
+  // beam breath (the cylinder itself flickers with the other holograms)
+  beamCore.material.opacity=0.55+0.20*Math.sin(tt*2.1);
+  beamGlow.material.opacity=0.45+0.20*Math.sin(tt*2.6);
+  // axes emerge inside the sphere on first selection
+  if(revealed&&revealT<1){revealT=Math.min(1,revealT+dt*0.55);
+    const e=1-Math.pow(1-revealT,3);
+    axesGrp.scale.setScalar(0.001+e*0.999);}
+  axesGrp.rotation.y+=dt*0.05;   // slow shared yaw — relative geometry (cosines) preserved
+  updateAxes(dt);
+  updatePlexus(tt);
+  updateAttention(dt);
+  updateRisers(dt);
+  updateFFN(dt, revealed?Math.min(1,revealT*1.4):0);
+  for(let i=rings.length-1;i>=0;i--){const r=rings[i];r.t+=dt;r.m.scale.setScalar(1+r.t*7);
+    r.m.material.opacity=Math.max(0,0.9-r.t*1.3);
+    if(r.m.material.opacity<=0){scene.remove(r.m);rings.splice(i,1);}}
+  renderer.render(scene,cam);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ---------- boot ---------- */
+const bootLines=["ΑΛΗΘΕΙΑ // un-concealment protocol","","loading measured dictionary ......... OK","identity check (median) ...... 1.2e-07 OK","frames: block 2 (lexical) / readability peak","models: Qwen2.5-3B  &middot;  Llama-3.2-3B","","truth is what remains when the box is opened."];
+const bl=document.getElementById('bootlog');let bi=0;
+(function bootStep(){if(bi<bootLines.length){bl.innerHTML+=bootLines[bi]+"<br>";bi++;setTimeout(bootStep,240);}
+ else setTimeout(()=>{const b=document.getElementById('boot');b.style.opacity=0;setTimeout(()=>b.remove(),1400);},650);})();
+
+/* ---------- page transition home + mobile theory toggle ---------- */
+const homeL=document.getElementById('homeL');
+homeL.addEventListener('click',ev=>{
+  if(ev.metaKey||ev.ctrlKey||ev.shiftKey)return;
+  ev.preventDefault(); document.body.classList.add('leaving');
+  setTimeout(()=>location.href=homeL.getAttribute('href'),560);
+});
+const theoT=document.getElementById('theoT');
+document.getElementById('mInfo').onclick=()=>{
+  theoT.classList.toggle('ovl');
+  if(theoT.classList.contains('ovl'))refreshTerms();
+};
+theoT.addEventListener('click',()=>{if(theoT.classList.contains('ovl'))theoT.classList.remove('ovl');});
+</script>
+</body>
+</html>

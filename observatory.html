@@ -60,10 +60,21 @@ html,body{height:100%;background:var(--bg);color:var(--tx);
  border:1px solid rgba(202,169,107,.75);pointer-events:none}
 .term::before{top:-1px;left:-1px;border-right:none;border-bottom:none;border-radius:12px 0 0 0}
 .term::after{bottom:-1px;right:-1px;border-left:none;border-top:none;border-radius:0 0 12px 0}
+/* the title bar doubles as a window handle: click it to roll the panel up */
 .term h3{font-size:9.5px;font-weight:700;letter-spacing:.32em;color:var(--au);
- padding-bottom:8px;margin-bottom:10px;position:relative}
+ padding-bottom:8px;margin-bottom:10px;position:relative;
+ cursor:pointer;user-select:none;padding-right:20px;transition:color .2s}
+.term h3:hover{color:var(--au-hi)}
 .term h3::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
  background:linear-gradient(90deg,rgba(202,169,107,.65),transparent)}
+.term h3::before{content:"\2013";position:absolute;right:0;top:-3px;
+ font-size:14px;line-height:1;letter-spacing:0;color:var(--au);opacity:.75}
+.term.min h3::before{content:"+"}
+/* rolled up: only the title bar is left */
+.term.min{flex:0 0 auto;min-height:0;padding:11px 15px}
+.term.min h3{margin-bottom:0;padding-bottom:0}
+.term.min h3::after{opacity:0}
+.term.min pre{display:none}
 .term pre{white-space:pre-wrap;word-break:break-word;color:var(--tx);
  font-family:"JetBrains Mono",monospace}
 .term .c{color:#7d8a6f}.term .k{color:var(--cy)}.term .n{color:var(--am)}.term .neg{color:var(--mg)}
@@ -133,8 +144,15 @@ html,body{height:100%;background:var(--bg);color:var(--tx);
  opacity:0;transition:opacity .55s ease}
 body.leaving #fader{opacity:1;pointer-events:auto}
 #mInfo{display:none}
+/* desktop & tablet: controls stay docked at the bottom even when a panel is rolled up */
+@media(min-width:921px){
+  #ctrl{margin-top:auto}
+  #links{margin-top:auto}
+}
 /* ---------- phone layout: tablet strip + compact controls docked at the bottom ---------- */
 @media(max-width:920px){
+  .term h3{cursor:default;padding-right:0}
+  .term h3::before{display:none}
   #title{top:8px;font-size:13.5px;letter-spacing:.26em;padding-left:.26em;width:96vw}
   #title small{font-size:7.5px;letter-spacing:.1em;margin-top:5px}
   #title::after{margin-top:6px;width:120px}
@@ -236,8 +254,9 @@ scene.fog=new THREE.FogExp2(0x0a0f1d,0.012);         // soft horizon haze
 
 const CORE_Y=2.6, SR=1.35, R=1.0;                    // sphere center / radius / axis length
 
-const cam=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,0.1,160);
-cam.position.set(0,4,9);    // inside the colonnade (Z=9), facing sphere and tripod
+const BASE_FOV=50, REF_ASPECT=16/9;
+const cam=new THREE.PerspectiveCamera(BASE_FOV,innerWidth/innerHeight,0.1,160);
+cam.position.set(0,4,IS_MOBILE?12.4:9);  // phones start further back: the scene is wide, their screen is not
 
 /* static cinematic orbit: the scene is born stable; free 360° manual exploration */
 const controls=new OrbitControls(cam,renderer.domElement);
@@ -245,9 +264,9 @@ controls.target.set(0,1.35,0);
 controls.enableDamping=true; controls.dampingFactor=0.05;
 controls.autoRotate=false;                       // no auto-rotation at startup
 controls.enablePan=false;
-controls.minDistance=5.5; controls.maxDistance=19;
+controls.minDistance=3.5; controls.maxDistance=26;   // room to get close, and to pull back off the temple
 controls.minPolarAngle=0.15; controls.maxPolarAngle=1.52;
-controls.zoomSpeed=0.6;
+controls.zoomSpeed=1.4;                              // was 0.6 — it took far too many turns to travel
 
 /* ---------- shared textures / helpers ---------- */
 function glowTexture(){const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');
@@ -831,8 +850,18 @@ document.getElementById('play').onclick=()=>{if(playing)return;
 
 /* ---------- resize ---------- */
 function onResize(){
+  const a=innerWidth/innerHeight;
   renderer.setSize(innerWidth,innerHeight,false);
-  cam.aspect=innerWidth/innerHeight; cam.updateProjectionMatrix();
+  cam.aspect=a;
+  /* A fixed VERTICAL fov crops the scene sideways as the viewport gets taller than it is
+     wide — which is exactly why the temple looked squashed on a phone. Widen the lens as
+     the screen narrows so the horizontal field is preserved, but clamp it so the
+     perspective never turns fish-eye. */
+  if(a<REF_ASPECT){
+    const hFov=2*Math.atan(Math.tan(BASE_FOV*Math.PI/360)*REF_ASPECT);
+    cam.fov=Math.min(2*Math.atan(Math.tan(hFov/2)/a)*180/Math.PI, 72);
+  } else cam.fov=BASE_FOV;
+  cam.updateProjectionMatrix();
 }
 addEventListener('resize',onResize); onResize();
 
@@ -901,6 +930,17 @@ document.getElementById('mInfo').onclick=()=>{
   if(theoT.classList.contains('ovl'))refreshTerms();
 };
 theoT.addEventListener('click',()=>{if(theoT.classList.contains('ovl'))theoT.classList.remove('ovl');});
+
+/* ---------- collapsible panels (desktop & tablet) ----------
+   The two glass panels are ~500px of chrome. On a tablet that leaves the sphere
+   pinched between them, so the title bar acts as a window handle: click to roll up.
+   Tablets open with both panels already rolled up — the scene comes first. */
+if(!IS_MOBILE){
+  document.querySelectorAll('.term h3').forEach(h=>{
+    h.addEventListener('click',()=>h.parentElement.classList.toggle('min'));
+  });
+  if(innerWidth<1200) document.querySelectorAll('.term').forEach(t=>t.classList.add('min'));
+}
 </script>
 </body>
 </html>

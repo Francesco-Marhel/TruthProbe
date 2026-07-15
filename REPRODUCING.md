@@ -4,7 +4,7 @@ All commands are run from `src/`. Dataset revisions are pinned for exact
 reproducibility. Every tool embeds its own safeguards (identity checks,
 held-out CV over pairs, permutation nulls, seed-stability criteria) and
 prints its measurements in full; no tool prints an automatic verdict.
-(All scripts in this repository were generated using a Large Language Model (LLM) under my direct guidance and supervision.).
+(All scripts in this repository were generated using a Large Language Model (LLM) under my direct guidance and supervision).
 
 > **Windows / PowerShell note:** the trailing `\` is bash line
 > continuation. On PowerShell, join each multi-line command onto a single

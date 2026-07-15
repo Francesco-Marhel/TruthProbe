@@ -1,11 +1,12 @@
-The calculated truth directions and extracted semantic weights are organized in the `Data/` directory, divided by model architecture. 
-Each folder contains both the raw PyTorch weights (`.pt`) for direct implementation and human-readable text mappings (`.json`) for quick inspection.
+The calculated truth directions and extracted semantic weights are organized in the `Data/` directory, divided by model architecture and K. 
+K-folder contains both the raw PyTorch weights (`.pt`) for direct implementation and human-readable text mappings (`.json`) for quick inspection.
+
 
 
 ├── Data/  │   
            |Llama3B/│   
-                    ├── truth_dictionary_Llama_32_3B.json│   
-                    │   truth_dictionary_Llama_32_3B.pt  │   
+                    |---K = 8   
+                    │---K = 33 
             |Qwen3B/│       
-                    ├── truth_dictionary_Qwen25_3B.json  │       
-                    └── truth_dictionary_Qwen25_3B.pt    │
+                    |---K = 8     
+                    |---K = 33

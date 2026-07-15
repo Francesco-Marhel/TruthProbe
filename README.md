@@ -68,7 +68,7 @@ Parquet only, at pinned revisions. `meta-llama/Llama-3.2-*` are gated:
 accept the license on Hugging Face and authenticate once with
 `hf auth login` (read token).
 
-## Reproducing
+## Reproducing 
 
 Every number in the manuscript is reproduced by one isolated command; the
 full list, organized per part and per model, is in
@@ -92,5 +92,5 @@ and human-readable text mappings (`.json`) for quick inspection.
 ## Citation
 
 Please cite the manuscript via its Zenodo deposit
-(https://zenodo.org/records/21211758, DOI 10.5281/zenodo.20938285) and
+(https://doi.org/10.5281/zenodo.21348060) and
 link this repository.

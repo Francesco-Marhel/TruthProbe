@@ -78,6 +78,7 @@ permutation nulls, multi-seed stability criteria) and prints its
 measurements in full; no tool prints an automatic verdict, and the model
 is passed explicitly to every command. A run is certified by its in-code
 checks, not by its launch conditions.
+(All scripts in this repository were generated using a Large Language Model (LLM) under my direct guidance and supervision).
 
 The calculated truth directions and extracted semantic weights are organized in the `Data/` directory, divided by model architecture. 
 Each folder contains both the raw PyTorch weights (`.pt`) for direct implementation,

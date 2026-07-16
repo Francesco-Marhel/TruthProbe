@@ -33,13 +33,6 @@ Earlier standalone documents (the single-axis paper, the anatomy note,
 the flip note v1/v2, the category note) are superseded by the manuscript;
 their versions live in `drafts/`.
 
-## The Axis Observatory
-
-`index.html` is an interactive summary (GitHub Pages): the measured
-per-category axes rendered in 3D, morphing from the lexical arrangement at
-block 2 to the peak arrangement, on both families. Every vector on screen
-is fitted to the measured signed-cosine matrices (fit error disclosed on
-the page; exact matrices in the paper).
 
 ## Layout
 
@@ -49,7 +42,7 @@ drafts/         superseded working-note versions
 src/            all scripts, flat; they import each other; do not split
                 into subfolders or the imports (and the commands in
                 REPRODUCING.md) break
-index.html      the Axis Observatory (GitHub Pages)
+index.html      (GitHub Pages)
 README.md
 REPRODUCING.md  full reproduction commands, one command per reported number
 LICENSE         Apache 2.0 (code)

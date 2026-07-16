@@ -171,3 +171,9 @@ python test_axis_provenance.py
 python test_ffn_erosion.py
 python test_swiglu.py
 ```
+
+
+
+### Part 3 Data.
+
+To generate the final results—spanning everything from the project's inception to the creation of the cosine matrix, you will find files in the `data` folder that allow you to reproduce them using specific flags, as well as a script to generate a GIF visualizing for the peak measurements for each layer (please refer to the `reproducing` instructions in the `data` folder). Additionally, the folder contains a 33x33 matrix along with the corresponding `.json` and `.pt` files for the respective models.

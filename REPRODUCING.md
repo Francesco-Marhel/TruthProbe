@@ -78,6 +78,13 @@ python src/know_rate_per_relation.py --model Qwen/Qwen2.5-3B
 python src/know_rate_per_relation.py --model meta-llama/Llama-3.2-3B
 ```
 
-Note on `arrangement_law.py`: it carries the canonical K=8 matrices
+##Note
+
+on `arrangement_law.py`: it carries the canonical K=8 matrices
 transcribed in its source, verified cell-by-cell against fresh
 `categories.py` runs; regeneration commands are in its header.
+
+The code was generated using an LLM, subject to my full decision-making and review,
+and to refine specific terminology necessitated by the translation from Italian to English.
+
+

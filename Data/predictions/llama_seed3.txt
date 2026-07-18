@@ -1,0 +1,19 @@
+[A] None   [B] None   K=8
+
+THE LAW @ this protocol   Mantel r = +0.912   p = 0.0032   Spearman = +0.882   (K'=8)
+surface control (early)   Mantel r = -0.176   p = 0.8822
+
+within-AUC (A|B): P103 0.97|0.98  P1412 0.96|0.64  P176 1.00|0.99  P27 0.97|0.99  P30 0.73|0.75  P37 0.96|0.95  P413 0.67|0.55  P495 0.92|0.94
+restricted set (within-AUC >= 0.6 on BOTH): ['P103', 'P1412', 'P176', 'P27', 'P30', 'P37', 'P495']
+THE LAW, restricted       Mantel r = +0.859   p = 0.0141   (K'=7; note: with K'<6 the permutation floor limits p)
+
+SYMBIOSIS  per-category adherence corr(row_A, row_B) vs knowledge proxy min(within-AUC):
+  P176   adherence +0.979   knowledge 0.99
+  P27    adherence +0.958   knowledge 0.97
+  P495   adherence +0.946   knowledge 0.92
+  P1412  adherence +0.904   knowledge 0.64
+  P30    adherence +0.897   knowledge 0.73
+  P37    adherence +0.892   knowledge 0.95
+  P103   adherence +0.800   knowledge 0.97
+  P413   adherence +0.618   knowledge 0.55
+  rank-correlation (Spearman) adherence ~ knowledge: +0.476   Pearson: +0.639   (registered prediction: positive)

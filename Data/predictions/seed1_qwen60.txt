@@ -1,0 +1,153 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[plan] 1 model(s): Qwen/Qwen2.5-3B
+
+==========================================================================================
+[dictionary] Qwen/Qwen2.5-3B   peak 16   FFN write 17   early 2
+==========================================================================================
+  [provenance] NeelNanda/counterfact-tracing @ c945b082ca08d0a8f3ba227fb78404a09614c36e (21919 rows)
+  [categories] top-8 relations by unique pairs:
+    P30: 60 pairs   template: '{} belongs to the continent of'
+    P27: 60 pairs   template: '{} has a citizenship from'
+    P413: 60 pairs   template: '{}, the'
+    P1412: 60 pairs   template: 'The language used by {} is'
+    P103: 60 pairs   template: 'The mother tongue of {} is'
+    P176: 60 pairs   template: '{}, developed by'
+    P495: 60 pairs   template: '{}, created in'
+    P37: 60 pairs   template: 'In {}, an official language is'
+[data] 960 sentences = 480 pairs, 8 categories
+[model] Qwen/Qwen2.5-3B on cuda (torch.float32)
+
+Loading weights:   0%|          | 0/434 [00:00<?, ?it/s]
+Loading weights:   3%|\u258e         | 15/434 [00:00<00:03, 119.03it/s]
+Loading weights:   6%|\u258b         | 28/434 [00:00<00:03, 123.06it/s]
+Loading weights:   9%|\u2589         | 41/434 [00:00<00:03, 119.01it/s]
+Loading weights:  15%|\u2588\u258d        | 63/434 [00:00<00:03, 121.25it/s]
+Loading weights:  18%|\u2588\u258a        | 76/434 [00:00<00:03, 116.68it/s]
+Loading weights:  21%|\u2588\u2588        | 89/434 [00:00<00:02, 116.20it/s]
+Loading weights:  26%|\u2588\u2588\u258c       | 111/434 [00:00<00:02, 120.86it/s]
+Loading weights:  29%|\u2588\u2588\u258a       | 124/434 [00:01<00:02, 119.33it/s]
+Loading weights:  32%|\u2588\u2588\u2588\u258f      | 137/434 [00:01<00:02, 120.75it/s]
+Loading weights:  37%|\u2588\u2588\u2588\u258b      | 159/434 [00:01<00:02, 124.79it/s]
+Loading weights:  40%|\u2588\u2588\u2588\u2589      | 172/434 [00:01<00:02, 120.45it/s]
+Loading weights:  43%|\u2588\u2588\u2588\u2588\u258e     | 185/434 [00:01<00:02, 122.62it/s]
+Loading weights:  48%|\u2588\u2588\u2588\u2588\u258a     | 207/434 [00:01<00:01, 127.70it/s]
+Loading weights:  51%|\u2588\u2588\u2588\u2588\u2588     | 220/434 [00:01<00:01, 122.63it/s]
+Loading weights:  54%|\u2588\u2588\u2588\u2588\u2588\u258e    | 233/434 [00:01<00:01, 120.58it/s]
+Loading weights:  56%|\u2588\u2588\u2588\u2588\u2588\u258b    | 245/434 [00:02<00:01, 120.16it/s]
+Loading weights:  59%|\u2588\u2588\u2588\u2588\u2588\u2589    | 257/434 [00:02<00:01, 118.93it/s]
+Loading weights:  64%|\u2588\u2588\u2588\u2588\u2588\u2588\u258d   | 279/434 [00:02<00:01, 133.84it/s]
+Loading weights:  68%|\u2588\u2588\u2588\u2588\u2588\u2588\u258a   | 293/434 [00:02<00:01, 133.68it/s]
+Loading weights:  73%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258e  | 315/434 [00:02<00:00, 134.23it/s]
+Loading weights:  76%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c  | 329/434 [00:02<00:00, 125.29it/s]
+Loading weights:  81%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588  | 351/434 [00:02<00:00, 126.03it/s]
+Loading weights:  84%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d | 365/434 [00:02<00:00, 128.96it/s]
+Loading weights:  87%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b | 378/434 [00:03<00:00, 127.13it/s]
+Loading weights:  92%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f| 399/434 [00:03<00:00, 122.04it/s]
+Loading weights:  95%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d| 412/434 [00:03<00:00, 116.95it/s]
+Loading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 434/434 [00:03<00:00, 126.45it/s]
+
+[extract] 10/960 sentences
+[extract] 20/960 sentences
+[extract] 30/960 sentences
+[extract] 40/960 sentences
+[extract] 50/960 sentences
+[extract] 60/960 sentences
+[extract] 70/960 sentences
+[extract] 80/960 sentences
+[extract] 90/960 sentences
+[extract] 100/960 sentences
+[extract] 110/960 sentences
+[extract] 120/960 sentences
+[extract] 130/960 sentences
+[extract] 140/960 sentences
+[extract] 150/960 sentences
+[extract] 160/960 sentences
+[extract] 170/960 sentences
+[extract] 180/960 sentences
+[extract] 190/960 sentences
+[extract] 200/960 sentences
+[extract] 210/960 sentences
+[extract] 220/960 sentences
+[extract] 230/960 sentences
+[extract] 240/960 sentences
+[extract] 250/960 sentences
+[extract] 260/960 sentences
+[extract] 270/960 sentences
+[extract] 280/960 sentences
+[extract] 290/960 sentences
+[extract] 300/960 sentences
+[extract] 310/960 sentences
+[extract] 320/960 sentences
+[extract] 330/960 sentences
+[extract] 340/960 sentences
+[extract] 350/960 sentences
+[extract] 360/960 sentences
+[extract] 370/960 sentences
+[extract] 380/960 sentences
+[extract] 390/960 sentences
+[extract] 400/960 sentences
+[extract] 410/960 sentences
+[extract] 420/960 sentences
+[extract] 430/960 sentences
+[extract] 440/960 sentences
+[extract] 450/960 sentences
+[extract] 460/960 sentences
+[extract] 470/960 sentences
+[extract] 480/960 sentences
+[extract] 490/960 sentences
+[extract] 500/960 sentences
+[extract] 510/960 sentences
+[extract] 520/960 sentences
+[extract] 530/960 sentences
+[extract] 540/960 sentences
+[extract] 550/960 sentences
+[extract] 560/960 sentences
+[extract] 570/960 sentences
+[extract] 580/960 sentences
+[extract] 590/960 sentences
+[extract] 600/960 sentences
+[extract] 610/960 sentences
+[extract] 620/960 sentences
+[extract] 630/960 sentences
+[extract] 640/960 sentences
+[extract] 650/960 sentences
+[extract] 660/960 sentences
+[extract] 670/960 sentences
+[extract] 680/960 sentences
+[extract] 690/960 sentences
+[extract] 700/960 sentences
+[extract] 710/960 sentences
+[extract] 720/960 sentences
+[extract] 730/960 sentences
+[extract] 740/960 sentences
+[extract] 750/960 sentences
+[extract] 760/960 sentences
+[extract] 770/960 sentences
+[extract] 780/960 sentences
+[extract] 790/960 sentences
+[extract] 800/960 sentences
+[extract] 810/960 sentences
+[extract] 820/960 sentences
+[extract] 830/960 sentences
+[extract] 840/960 sentences
+[extract] 850/960 sentences
+[extract] 860/960 sentences
+[extract] 870/960 sentences
+[extract] 880/960 sentences
+[extract] 890/960 sentences
+[extract] 900/960 sentences
+[extract] 910/960 sentences
+[extract] 920/960 sentences
+[extract] 930/960 sentences
+[extract] 940/960 sentences
+[extract] 950/960 sentences
+[extract] 960/960 sentences
+[identity check] median 1.23e-07  (must be ~0)
+
+[saved] dizionari_seed1\truth_dictionary_Qwen25_3B.pt  (+ .json human summary)
+  cats: ['P103', 'P1412', 'P176', 'P27', 'P30', 'P37', 'P413', 'P495']
+  axes [K,d] = (8, 2048)   t_global [d] = (2048,)
+  decoding: Delta f 74.58% vs lexical 38.12% (chance 12%)
+  load with:  b = torch.load(path); scores = states @ b['axes'].T
+
+[done] dictionaries in ./dizionari_seed1/

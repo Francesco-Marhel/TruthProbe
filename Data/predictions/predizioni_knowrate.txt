@@ -1,0 +1,131 @@
+(1) la simbiosi pulita: Spearman positivo tra min(know_Qwen, know_Llama) per relazione e l'aderenza del K33, 
+    atteso ≥ +0.4 (il proxy dava +0.649, e il know-rate è un lower bound rumoroso: un po' di attenuazione è fisiologica); 
+(2) Llama sopra Qwen in media sulle 33 (il distillato enciclopedico contro il matematico); 
+(3) le tre aderenze negative (P364, P39, P413) con know-rate basso o mediocre in almeno un modello; 
+(4) P30 e P407 tra i know più bassi di Qwen. 
+Se la (1) esce, la frase del paper "the one measurement of this line we leave open" muore e al suo posto entra un numero: che è il miglior necrologio possibile per una limitazione.
+
+
+
+*   1  P30           959  OK   {} belongs to the continent of
+*   2  P27           958  OK   {} has a citizenship from
+*   3  P413          952  OK   {}, the
+*   4  P1412         924  OK   The language used by {} is
+*   5  P103          919  OK   The mother tongue of {} is
+*   6  P176          908  OK   {}, developed by
+*   7  P495          904  OK   {}, created in
+*   8  P37           891  OK   In {}, an official language is
+    9  P17           875  OK   {}, which is located in
+   10  P136          847  OK   What does {} play? They play
+   11  P937          846  OK   {} found employment in
+   12  P106          821  OK   {}, who works as
+   13  P20           816  OK   {} expired at
+   14  P449          794  OK   {} was released on
+   15  P19           779  OK   {} was born in
+   16  P740          774  OK   {}, that was created in
+   17  P159          756  OK   The headquarter of {} is located in
+   18  P364          751  OK   The original language of {} was
+   19  P131          714  OK   {} is in
+   20  P190          621  OK   What is the twin city of {}? It is
+   21  P276          613  OK   {} can be found in
+   22  P178          579  OK   {} was created by
+   23  P101          545  OK   {}'s domain of work is
+   24  P1303         513  OK   {}, the
+   25  P39           476  OK   {} is a
+   26  P127          433  OK   {}, by
+   27  P140          430  OK   The official religion of {} is
+   28  P108          350  OK   {}, who is employed by
+   29  P641          318  OK   {} professionally plays the sport
+   30  P138          279  OK   {} is named for
+   31  P407          216  OK   {} was written in
+   32  P463          163  OK   {} belongs to the organization of
+   33  P36           139  OK   {}'s capital is
+   34  P264           53  low  {} label :
+
+
+
+   python know_rate_per_relation.py --model Qwen/Qwen2.5-3B
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 434/434 [00:00<00:00, 3068.86it/s]
+relation    n  known  know-rate
+P101       60     14      0.233
+P103       60     32      0.533
+P106       60      6      0.100
+P108       60     20      0.333
+P127       60     22      0.367
+P1303      60     19      0.317
+P131       60     17      0.283
+P136       60      7      0.117
+P138       60     27      0.450
+P140       60     29      0.483
+P1412      60     14      0.233
+P159       60     26      0.433
+P17        60     16      0.267
+P176       60     48      0.800
+P178       60     48      0.800
+P19        60      2      0.033
+P190       60      0      0.000
+P20        60      2      0.033
+P27        60     24      0.400
+P276       60     15      0.250
+P30        60     19      0.317
+P36        60     46      0.767
+P364       60     24      0.400
+P37        60     33      0.550
+P39        60     13      0.217
+P407       60     27      0.450
+P413       60     24      0.400
+P449       60      8      0.133
+P463       60      2      0.033
+P495       60      1      0.017
+P641       60     21      0.350
+P740       60      2      0.033
+P937       60      7      0.117
+
+[saved] know_rate_Qwen2.5-3B_seed0.json
+
+
+
+
+python know_rate_per_relation.py --model meta-llama/Llama-3.2-3B
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 254/254 [00:00<00:00, 2473.37it/s]
+relation    n  known  know-rate
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+P101       60     14      0.233
+P103       60     28      0.467
+P106       60     11      0.183
+P108       60     30      0.500
+P127       60     23      0.383
+P1303      60     20      0.333
+P131       60     24      0.400
+P136       60     15      0.250
+P138       60     31      0.517
+P140       60     32      0.533
+P1412      60      6      0.100
+P159       60     41      0.683
+P17        60     25      0.417
+P176       60     50      0.833
+P178       60     51      0.850
+P19        60      7      0.117
+P190       60      0      0.000
+P20        60      5      0.083
+P27        60     46      0.767
+P276       60     31      0.517
+P30        60     22      0.367
+P36        60     39      0.650
+P364       60     33      0.550
+P37        60     37      0.617
+P39        60     21      0.350
+P407       60     22      0.367
+P413       60     21      0.350
+P449       60     22      0.367
+P463       60      8      0.133
+P495       60      6      0.100
+P641       60     27      0.450
+P740       60      5      0.083
+P937       60      9      0.150
+
+[saved] know_rate_Llama-3.2-3B_seed0.json

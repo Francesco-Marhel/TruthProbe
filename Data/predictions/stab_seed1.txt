@@ -1,0 +1,21 @@
+[A] Qwen/Qwen2.5-3B   [B] Qwen/Qwen2.5-3B   K=8
+
+THE LAW @ this protocol   Mantel r = +0.670   p = 0.0005   Spearman = +0.772   (K'=8)
+surface control (early)   Mantel r = -0.392   p = 0.9459
+
+within-AUC (A|B): P103 0.84|0.78  P1412 0.72|0.78  P176 0.94|0.96  P27 0.54|0.84  P30 0.77|0.75  P37 0.41|0.49  P413 0.58|0.63  P495 0.52|0.63
+restricted set (within-AUC >= 0.6 on BOTH): ['P103', 'P1412', 'P176', 'P30']
+THE LAW, restricted       Mantel r = +0.870   p = 0.0743   (K'=4; note: with K'<6 the permutation floor limits p)
+
+SYMBIOSIS  per-category adherence corr(row_A, row_B) vs knowledge proxy min(within-AUC):
+  P37    adherence +0.918   knowledge 0.41
+  P1412  adherence +0.900   knowledge 0.72
+  P30    adherence +0.720   knowledge 0.75
+  P103   adherence +0.701   knowledge 0.78
+  P176   adherence +0.658   knowledge 0.94
+  P413   adherence +0.579   knowledge 0.58
+  P495   adherence +0.518   knowledge 0.52
+  P27    adherence +0.212   knowledge 0.54
+  rank-correlation (Spearman) adherence ~ knowledge: +0.071   Pearson: +0.156   (registered prediction: positive)
+
+[B vs its reference] corr before sign repair +0.670 -> after +0.670   suspected orientation flips: none

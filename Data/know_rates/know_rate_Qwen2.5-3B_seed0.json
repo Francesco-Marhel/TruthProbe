@@ -1,0 +1,174 @@
+{
+ "model": "Qwen/Qwen2.5-3B",
+ "revision": "c945b082ca08d0a8f3ba227fb78404a09614c36e",
+ "seed": 0,
+ "per_relation_max": 60,
+ "criterion": "behav_check.py",
+ "per_relation": {
+  "P101": {
+   "n": 60,
+   "known": 14,
+   "know_rate": 0.2333
+  },
+  "P103": {
+   "n": 60,
+   "known": 32,
+   "know_rate": 0.5333
+  },
+  "P106": {
+   "n": 60,
+   "known": 6,
+   "know_rate": 0.1
+  },
+  "P108": {
+   "n": 60,
+   "known": 20,
+   "know_rate": 0.3333
+  },
+  "P127": {
+   "n": 60,
+   "known": 22,
+   "know_rate": 0.3667
+  },
+  "P1303": {
+   "n": 60,
+   "known": 19,
+   "know_rate": 0.3167
+  },
+  "P131": {
+   "n": 60,
+   "known": 17,
+   "know_rate": 0.2833
+  },
+  "P136": {
+   "n": 60,
+   "known": 7,
+   "know_rate": 0.1167
+  },
+  "P138": {
+   "n": 60,
+   "known": 27,
+   "know_rate": 0.45
+  },
+  "P140": {
+   "n": 60,
+   "known": 29,
+   "know_rate": 0.4833
+  },
+  "P1412": {
+   "n": 60,
+   "known": 14,
+   "know_rate": 0.2333
+  },
+  "P159": {
+   "n": 60,
+   "known": 26,
+   "know_rate": 0.4333
+  },
+  "P17": {
+   "n": 60,
+   "known": 16,
+   "know_rate": 0.2667
+  },
+  "P176": {
+   "n": 60,
+   "known": 48,
+   "know_rate": 0.8
+  },
+  "P178": {
+   "n": 60,
+   "known": 48,
+   "know_rate": 0.8
+  },
+  "P19": {
+   "n": 60,
+   "known": 2,
+   "know_rate": 0.0333
+  },
+  "P190": {
+   "n": 60,
+   "known": 0,
+   "know_rate": 0.0
+  },
+  "P20": {
+   "n": 60,
+   "known": 2,
+   "know_rate": 0.0333
+  },
+  "P27": {
+   "n": 60,
+   "known": 24,
+   "know_rate": 0.4
+  },
+  "P276": {
+   "n": 60,
+   "known": 15,
+   "know_rate": 0.25
+  },
+  "P30": {
+   "n": 60,
+   "known": 19,
+   "know_rate": 0.3167
+  },
+  "P36": {
+   "n": 60,
+   "known": 46,
+   "know_rate": 0.7667
+  },
+  "P364": {
+   "n": 60,
+   "known": 24,
+   "know_rate": 0.4
+  },
+  "P37": {
+   "n": 60,
+   "known": 33,
+   "know_rate": 0.55
+  },
+  "P39": {
+   "n": 60,
+   "known": 13,
+   "know_rate": 0.2167
+  },
+  "P407": {
+   "n": 60,
+   "known": 27,
+   "know_rate": 0.45
+  },
+  "P413": {
+   "n": 60,
+   "known": 24,
+   "know_rate": 0.4
+  },
+  "P449": {
+   "n": 60,
+   "known": 8,
+   "know_rate": 0.1333
+  },
+  "P463": {
+   "n": 60,
+   "known": 2,
+   "know_rate": 0.0333
+  },
+  "P495": {
+   "n": 60,
+   "known": 1,
+   "know_rate": 0.0167
+  },
+  "P641": {
+   "n": 60,
+   "known": 21,
+   "know_rate": 0.35
+  },
+  "P740": {
+   "n": 60,
+   "known": 2,
+   "know_rate": 0.0333
+  },
+  "P937": {
+   "n": 60,
+   "known": 7,
+   "know_rate": 0.1167
+  }
+ }
+}

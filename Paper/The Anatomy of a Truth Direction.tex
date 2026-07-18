@@ -9,6 +9,7 @@
 \usepackage{microtype}
 \usepackage[hidelinks]{hyperref}
 \usepackage{float}
+\usepackage{multirow}
 
 \newtheorem{lemma}{Lemma}
 \newtheorem{definition}{Definition}
@@ -27,7 +28,8 @@ truth direction: the single-axis paper and the anatomy note (Part~I, reviewed
 in an earlier form and revised following referee-style comments by B.~Nadler)
 and three working notes on the cross-family mechanics and category geometry
 (Part~II). Every number in both parts was regenerated under a single uniform
-protocol on July 9--10, 2026. Corrections of the author's own published
+protocol on July 9--10, 2026; the stress tests of Part~II were run
+July 15--17, 2026 under the same contract. Corrections of the author's own published
 interpretations are reported inside the text, as results.}}
 
 \begin{document}
@@ -36,30 +38,30 @@ interpretations are reported inside the text, as results.}}
 \begin{abstract}
 B\"urger et al.\ (2024) demonstrated that truth representations in large
 language models are universal across statement polarity but reside within a
-multidimensional subspace. This manuscript extends that framework along
-three questions: how the dimensionality of the subspace depends on the
-model's knowledge, which architectural component builds the truth
-direction, and what the direction is a mixture of. In Part~I, using a
-training-free directional probe derived from the SVD of hidden-state
-minimal pairs, we show that the dimensionality of truth is
-knowledge-dependent: the signal is highly concentrated on a single axis for
-behaviorally known facts (held-out AUC $0.938$) and becomes diffuse as
-model knowledge decreases or material heterogeneity increases. Seven
-falsification experiments sustain the one-dimensional reading on known
-facts, and the same decomposition recovers the supervised polarity
-direction of B\"urger et al.\ at cosine $0.959$ without polarity labels. In
-Part~II, we follow the direction across four base models from two families
-under pre-registered predictions. A relational empirical law emerges:
-attention modules propagate truth frames they did not write, whereas
-feed-forward networks oppose the frame of their current block to deposit
-next-frame content; the law generalizes, and corrects, a peak-anchored
-claim of our own exposed by a provenance control built against our own
-instrument. Post-peak signal decay is causally attributed, on all four
-models, to the SwiGLU value stream rather than its gate. Finally,
-per-category truth axes form a semantically signed arrangement that
-contradicts the lexical surface and converges across families
-(Mantel $p = 0.0009$), indicating that the geometry of the mixture belongs
-to the knowledge domain rather than to the architecture.
+multidimensional subspace. We extend that framework along three questions:
+how the dimensionality of the subspace depends on the model's knowledge,
+which architectural component builds the truth direction, and what the
+direction is a mixture of. In Part~I (one model), a training-free
+directional probe derived from the SVD of hidden-state minimal pairs shows
+that the dimensionality of truth is knowledge-dependent: the signal is
+concentrated on a single axis for behaviorally known facts (held-out AUC
+$0.938$) and becomes diffuse as knowledge decreases or material
+heterogeneity increases; seven falsification experiments sustain the
+one-dimensional reading, and the same decomposition recovers the supervised
+polarity direction of B\"urger et al.\ at cosine $0.959$ without polarity
+labels. In Part~II (four base models, two families, pre-registered
+predictions), a relational law emerges: attention propagates truth frames
+it did not write, the feed-forward network opposes the frame of its current
+block, and the genuine post-peak decay is causally attributed on all four
+models to the SwiGLU value stream; per-category truth axes form a
+semantically signed arrangement that contradicts the lexical surface and
+converges across families (Mantel $p = 0.0009$). Stress tests at three
+scales ($33$ categories, $888$ pairs per relation, six sampling seeds)
+expose a sign instability of the per-category orientation, repair it with a
+declared spectral consensus gauge, and sharpen the convergence into a
+knowledge-gated law, strengthening from $+0.42$ on dense mixed-knowledge
+material to $+0.74$ on knowledge-restricted categories: the geometry of the
+mixture belongs to the knowledge domain rather than to the architecture.
 \end{abstract}
 
 \section{Introduction}
@@ -127,7 +129,11 @@ form a semantically signed arrangement that reorganizes with depth,
 contradicts the shared lexical arrangement both families start from, and
 converges across the families; the FFN writes truth along
 category-dependent directions, decoding the category far above a lexical
-baseline. The knowledge-dependent gap of Part~I is, in hindsight, this
+baseline. Three stress tests then push the geometry to a larger
+category count, a higher pair density, and re-sampled pairs; they
+expose, and repair with a declared spectral gauge, a sign instability
+of the per-category orientation, and they sharpen the arrangement claim
+into a knowledge-gated law. The knowledge-dependent gap of Part~I is, in hindsight, this
 mixture seen from one direction.
 
 The two parts share every methodological choice: the same pinned dataset
@@ -325,6 +331,23 @@ cancel shared structure. Third, the two designs are complementary rather than
 competing: the negated forms are exactly the NT/NF cells of the polarity
 design, so the alternative is not ignored but treated as its own object of
 study.
+
+\paragraph{Lexical confounds, declared up front.} Any paired design
+risks measuring the lexical surface rather than truth: the flipped content
+word, the template's wording, or both. Four controls, executed in later
+sections but declared here because a careful reader is right to demand them
+early, bound the risk. The per-layer curves start at chance (layer-$0$ AUC
+$0.500$ on all four models of Part~II), which a token-identity axis would
+not do; all AUCs are held out across pairs with disjoint targets; the
+category analysis carries its own lexical baseline (decoding the relation
+from early residual differences reaches $39$--$42\%$ against $74$--$82\%$
+for the peak-adjacent FFN writes); and the early category arrangement is
+uncorrelated or anti-correlated with the peak arrangement within each model
+($r = -0.547$ and $-0.175$), so the peak geometry contradicts the lexical
+surface it started from. One residual is declared, not dismissed: each
+CounterFact relation contributes one statement template, so template syntax
+can contribute to individual cells (the continent anti-alignment is the
+flagged case), and crossed templates are the known cure.
 
 \subsection{The axis, and where labels enter}
 \label{sec:axis}
@@ -1121,10 +1144,11 @@ Sec.~\ref{sec:future}. All experiments in this manuscript are fully reproducible
 \section{Scope and evidence levels}
 \label{b:sec:scope}
 
-Results are organized in three evidential levels and never mixed.
-\textbf{Level A}: replicated across models with predictions written before
-the runs. \textbf{Level B}: causal but on fewer models, or with multiple
-independent methods on one. \textbf{Level C}: leads, declared as such
+Results are organized in three evidential tiers, continuing the
+Tier~1 / Tier~2 separation of Part~I with a finer grain, and never mixed.
+\textbf{Tier A}: replicated across models with predictions written before
+the runs. \textbf{Tier B}: causal but on fewer models, or with multiple
+independent methods on one. \textbf{Tier C}: leads, declared as such
 (Sec.~\ref{b:sec:leads}). Retractions and failed predictions are reported in
 the text at the point where they occur; the largest, the correction of our
 own flip interpretation, has its own section (\ref{b:sec:correction}).
@@ -1470,7 +1494,7 @@ frame-relative rotation (what the flip was) and frame-free decay of class
 signal after the peak (the genuine erosion). The erosion stands on
 measurements that use no frozen frame, now on all four models
 (Table~\ref{b:tab:ablate}); the predictions for the Llama rows were
-registered before those runs and confirmed. This section is Level A.
+registered before those runs and confirmed. This section is Tier A.
 
 \begin{table}[H]
 \centering
@@ -1700,6 +1724,214 @@ level, and the within-model reorganization between them.}
 \label{b:fig:law}
 \end{figure}
 
+\section{Stress tests of the arrangement law: sign gauge, sample density, and the knowledge gate}
+\label{b:sec:stress}
+
+The arrangement law of Sec.~\ref{b:sec:mixture} was established at one
+scale: $K{=}8$ relations, $60$ pairs each, one sampling seed. This section
+subjects it to three independent stresses, category count ($K{=}33$),
+sample density ($888$ pairs per relation), and the seed of the pair
+sampling (six additional seeds), and reports, as results, one instrument
+failure discovered on the way and the correction that repairs it. All
+bundles are produced by one exporter under the pinned dataset revision, and
+every comparison is one command on two exported dictionaries.
+
+\paragraph{The statistics, formally.} Let $\hat v_1, \dots, \hat v_K$ be
+the unit per-category axes of one model at its peak, $C_{ij} = \hat v_i
+\cdot \hat v_j$ their cosine matrix, and $s \in \{\pm 1\}^K$ a sign
+assignment (a \emph{gauge}); the signed matrix under $s$ is
+\begin{equation}
+M \;=\; D_s\, C\, D_s, \qquad D_s = \mathrm{diag}(s),
+\qquad M_{ij} = s_i s_j\, C_{ij}.
+\label{b:eq:gauge}
+\end{equation}
+Three gauges appear below. The \emph{per-category} gauge takes $s_i$ from
+the true-side positivity of category $i$ on its own pairs. The
+\emph{global-axis} gauge takes $s_i = \mathrm{sign}(\hat v_i \cdot t)$
+with $t$ the truth axis fit on the pooled pairs. The \emph{consensus}
+gauge, adopted in this section, takes
+\begin{equation}
+s^{\star} = \mathrm{sign}(u), \qquad
+u = \arg\max_{\lVert x \rVert = 1} x^{\top} C\, x,
+\label{b:eq:eigen}
+\end{equation}
+the leading eigenvector of $C$: the spectral relaxation of
+$\max_{s} \sum_{ij} s_i s_j C_{ij}$, i.e.\ the assignment that maximizes
+collective sign agreement. The per-category margin is
+$|u_i| / \lVert u \rVert_{\infty}$; components below $0.10$ are declared
+unsigned rather than forced, and the overall sign of $u$ is fixed by
+majority. Agreement between two models is the Mantel statistic
+\begin{equation}
+r = \mathrm{Pearson}\big(\mathcal{O}(M^{A}), \mathcal{O}(M^{B})\big),
+\qquad
+\hat p = \frac{1 + \#\{b : r_b \geq r\}}{B + 1},
+\label{b:eq:mantel}
+\end{equation}
+with $\mathcal{O}(\cdot)$ the off-diagonal cells and $r_b$ obtained by
+jointly permuting the rows and columns of one matrix under a random
+category relabeling ($B = 9999$). The knowledge-restricted variant
+recomputes $r$ on $\mathcal{C}_{\tau} = \{\, i : W_i^{A} \geq \tau \wedge
+W_i^{B} \geq \tau \,\}$ with $W_i$ the within-category held-out AUC and
+$\tau = 0.6$. Per-category agreement is the \emph{adherence}
+$\mathrm{adh}_i = \mathrm{Pearson}\big(\mathcal{O}_i(M^{A}),
+\mathcal{O}_i(M^{B})\big)$ over the off-diagonal cells of row $i$, and the
+knowledge gate is the rank correlation of $\mathrm{adh}$ with a
+per-category knowledge measure. Finally, the \emph{sign repair} used in
+diagnosis searches $s$ by greedy coordinate descent to maximize
+$\mathrm{Pearson}\big(\mathcal{O}(D_s M^{A} D_s),
+\mathcal{O}(M^{B})\big)$; the flips it reports name the unstable axes. It
+is a diagnostic and never a gauge: fitting signs to the reference under
+comparison would assume the conclusion.
+
+\paragraph{The instability: per-category orientation is a thin gauge.}
+Each axis is identified by Lemma~\ref{lem:labels} up to sign, and the sign
+was fixed within the category. That orientation margin is thin exactly
+where the model knows little, and a thin margin is a coin. The seed study
+exposed the coin: re-sampling the $60$ Qwen pairs under six seeds left the
+unsigned structure $|C|$ essentially unchanged but produced sign storms in
+half the runs (three of six signed matrices anti-correlated with the
+canonical one, Mantel $-0.42$/$-0.26$/$-0.21$; sign repair restores
+$+0.46$/$+0.59$/$+0.73$, identifying coordinated flips of two to three
+axes). The same pathology governs density: at $888$ pairs the full
+cross-family comparison collapses to $+0.233$ ($p = 0.15$), every category
+subset containing P495 fails while the same test excluding P495 returns
+$+0.621$ ($p = 0.005$), and the repair diagnostic identifies P495 as the
+flipped axis. The low know-rates of the affected relations place the
+instability where the dimensionality relation of Part~I predicts weak,
+diffuse signal.
+
+\paragraph{A failed cure, reported: the pooled global axis is capturable.}
+The first repair we registered was the global-axis gauge. The control that
+killed it is worth the space it takes: on the Qwen $K{=}8$ pool the stored
+global direction has cosine $0.99$ with the axis of P30 (continent), the
+one category that anti-aligns with the language block. The dominant
+direction of a heterogeneous pool is a property of the mixture: whichever
+category contributes the largest, most coherent difference vectors
+captures it, so the referee inherits exactly the problem it was appointed
+to judge. On Llama, whose pool is dominated by a compact high-knowledge
+block, the same estimator is healthy; the failure is knowledge-dependent,
+like everything else in this series.
+
+\paragraph{The cure: the spectral consensus.} The consensus gauge of
+Eq.~\ref{b:eq:eigen} uses no pool. Under it the margins are legible on
+both families: the Llama block sits at $+0.73$ to $+1.00$ with P30
+negative on every bundle (its semantic sign, not an error) and P413 near
+zero (the loner, reported unsigned); on the weakest bundle in the study
+(Qwen, $60$ pairs) the block is positive with P30 at $-0.28$. Where the
+two gauges can be compared on a healthy pool ($K{=}33$) they flip
+identical category sets on both models, so the correction changes nothing
+where nothing was broken. A gauge, finally, cannot manufacture structure:
+only relative signs are observables, since any product of cosines around
+a closed cycle ($C_{ij} C_{jk} C_{ki}$) is invariant under every sign
+assignment. The anti-alignment of P30 survives the consensus precisely
+because its cycles with the language block are frustrated and no
+assignment can synchronize them; the gauge does not create that
+obstruction, it exposes it. And because the consensus is computed
+per model, independently, cross-family agreement under it cannot be an
+artifact of the gauge: two referees who never speak cannot collude.
+
+\begin{table}[H]
+\centering
+\caption{The arrangement law under the consensus gauge. Seed rows:
+Qwen2.5-3B, canonical seed vs.\ each of six re-samplings, $K{=}8$, $60$
+pairs. Scale rows: Llama-3.2-3B vs.\ Qwen2.5-3B. ``Per-category'' is the
+original within-category orientation, where measured. Mantel $r$ on
+off-diagonal signed cosines; $p$ from category-label permutation.}
+\label{b:tab:stress}
+\begin{tabular}{lccc}
+\toprule
+comparison & per-category gauge & consensus gauge & $p$ (consensus) \\
+\midrule
+seed 1 vs.\ canonical & \multirow{6}{*}{\shortstack{$3$ of $6$ negative\\($-0.42$ to $+0.86$)}} & $+0.589$ & $0.0011$ \\
+seed 2 & & $+0.643$ & $0.0048$ \\
+seed 3 & & $+0.354$ & $0.0433$ \\
+seed 7 & & $+0.811$ & $0.0002$ \\
+seed 8 & & $+0.452$ & $0.0328$ \\
+seed 9 & & $+0.681$ & $0.0057$ \\
+\midrule
+cross-family, $K{=}8$, $888$ pairs & $+0.233$ ($p{=}0.15$) & $+0.424$ & $0.0034$ \\
+cross-family, $K{=}33$, $60$ pairs & $+0.559$ & $+0.559$ & $0.0001$ \\
+\quad restricted to $19$ known relations & & $+0.744$ & $0.0001$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{The law at scale, and the knowledge gate.} With the gauge
+repaired, the three stresses return one coherent picture
+(Table~\ref{b:tab:stress}). The seed storms disappear: six of six
+comparisons positive and significant. The control arm was registered as
+a prediction of the gating itself: if the instability is
+knowledge-dependent, the high-knowledge family must be stable under any
+gauge. Six re-samplings on Llama-3.2-3B return Mantel $+0.912$ to
+$+0.991$ under the consensus gauge and $+0.930$ to $+0.992$ under the
+original per-category orientation (all $p \leq 0.0032$), with the same
+flip set on every bundle
+(P30 negative, the loner P413 unsigned at margins $|u_i| \leq 0.08$
+across all seeds): the disease never touched the family whose margins
+are fat, which is what a knowledge-gated instability must do. On the
+same family the adherence-knowledge correlation is positive already at
+$K{=}8$ (Spearman $+0.48$ to $+0.81$ across the six comparisons),
+confirming that its failure on Qwen at that scale was range
+restriction, not absence of the gate. The dense cross-family comparison
+becomes measurable at $+0.424$ ($p = 0.0034$); the registered prediction
+($\geq +0.5$) is met in sign and significance and missed in magnitude, and
+is reported as such. At $K{=}33$ the law holds on $528$ cells at $+0.559$
+($p = 0.0001$) and sharpens to $+0.744$ on the $19$ relations with
+$W_i \geq 0.6$ on both families. The gradient $+0.424 \to +0.559 \to
++0.744$ is the law's boundary condition made quantitative: \emph{the
+convergent arrangement is a property of shared knowledge, and it fades,
+category by category, exactly where knowledge does}. The per-category
+confirmation is the adherence analysis: at $K{=}33$ the correlation
+between adherence and the representational proxy $\min(W_i^{A}, W_i^{B})$
+is Spearman $+0.649$ (Pearson $+0.493$), and the three negative-adherence
+categories sit in or near the unsigned set; at $K{=}8$ the same statistic
+is uninformative and was falsified as registered (eight categories
+selected for signal compress the proxy's range), a scoping lesson we keep.
+The proxy is not independent of the quantity it gates (both are attenuated
+by weak axes), so the behavioral per-relation know-rate was measured on
+both models (greedy completion, the criterion of \texttt{behav\_check.py},
+$60$ prompts per relation). The registered prediction (Spearman $\geq
++0.4$ against adherence) was falsified: the correlation is positive but
+weak (Spearman $+0.21$ on the per-relation minimum, $+0.26$ on the mean,
+$+0.33$ for Llama alone), far below the representational proxy's $+0.649$.
+We read the divergence as informative rather than fatal: several relations
+with near-perfect within-category separability verbalize poorly under
+their single template (P17, P937, P276: within-AUC $\geq 0.90$, know-rate
+$0.12$--$0.42$), so the string-match know-rate is a noisy lower bound on
+what the model represents, and the gate correlates with \emph{represented}
+knowledge more than with verbalized recall. The sharpest single cell
+supports the gate at the individual level: P495, the one sign-unstable
+axis of this study, has the second-lowest behavioral know-rate of all
+$33$ relations ($0.017$ on Qwen, $0.100$ on Llama). Whether the gate is
+genuinely representational or the know-rate is template-limited is
+decidable with crossed templates, the same cure already owed to the
+continent anti-alignment.
+
+\paragraph{Provenance, learned the hard way.} During these runs an
+identity mix-up placed one bundle under another bundle's name. It was
+caught, and resolved without ambiguity, because a dictionary's cosine
+matrix is a fingerprint: matrices matched to $5 \times 10^{-4}$ identify
+content regardless of filename, and content hashes identify bytes. Two
+rules join the reproducibility contract as a consequence: every exported
+artifact carries its full identity (model, $K$, pairs, seed, revision)
+inside the file and in the filename, and any bundle whose provenance
+cannot be established from its content is quarantined from analysis.
+Names can lie; axes cannot.
+
+\paragraph{What changes for the claims.} The arrangement law R5 is
+unchanged at its registered scope and strengthened beyond it: it now rests
+on two families, three scales, seven samplings, and one declared gauge.
+Three amendments are adopted. First, all signed cross-model comparisons in
+this series use the consensus gauge; the per-category orientation remains
+correct for within-category use (transfer, AUC) and is retired for
+cross-model signs. Second, the axis of P495 is documented as sign-unstable
+(its flip alone poisoned the dense comparison) and the axes of P413 and
+P30 carry their consensus verdicts, unsigned and semantically negative
+respectively. Third, the law is stated with its gate: convergence of the
+truth-mixture arrangement across families is knowledge-gated, and its
+strength is a monotone function of how well both models know the
+categories being compared.
+
 \section{The measured dictionary and the sparse contract}
 \label{b:sec:contract}
 
@@ -1707,7 +1939,9 @@ level, and the within-model reorganization between them.}
 the per-category oriented axes, the global axis, and the FFN write
 centroids, with signed matrices and full metadata in one loadable file (a
 $[K \times d]$ bundle of tens of kilobytes): a $K$-direction truth and
-category monitor whose baseline performance is quantified above. The
+category monitor whose baseline performance is quantified above; the export now spans,
+per model, the three scales of Sec.~\ref{b:sec:stress} together with
+their consensus-gauge signed matrices. The
 sparse autoencoder that this series hands to engineering is justified only
 if, against matched nulls, it (1) aligns with the per-category axes, (2)
 respects the semantic geography, (3) reproduces the signs, including the
@@ -1775,7 +2009,12 @@ statistics, but the formal check is future work. Ablation measures
 necessity for linear readability of truth, not for behavior; the freezes
 act at the reading position only. The category section uses $60$ pairs per
 relation, no bootstrap error bars, and one degenerate relation on Llama
-(declared). The know-rate is a string-match lower bound. The
+(declared). The know-rate is a string-match lower bound, and its per-relation
+version correlates only weakly with cross-family adherence
+(Sec.~\ref{b:sec:stress}), a divergence crossed templates must
+arbitrate. The consensus gauge is a spectral relaxation: axes with
+near-zero consensus components are reported unsigned rather than
+resolved, and a third family is owed to the gauge as much as to the law. The
 propagate/overwrite reading is a description of measured alignments, not
 yet a circuit-level mechanism; why attention inherits frames and the FFN
 opposes them is the open question this paper sharpens rather than answers.
@@ -1793,6 +2032,10 @@ value stream. The geometry: the single axis is a semantically signed
 mixture whose arrangement the model does not inherit from the lexical
 surface but constructs, and constructs the same way across two families,
 because the arrangement belongs to the knowledge, not to the machine.
+Stress tests at three scales added the boundary condition: the
+convergence is knowledge-gated, and the gauge that reads its signs must
+itself be declared, because the sign of a weakly known axis is not an
+observable.
 Between the two movements sits the correction that makes them trustworthy:
 a pre-registered claim of ours, confirmed on three models, was exposed as
 the special case of a better law by a control built against our own
@@ -1814,6 +2057,21 @@ throughout this manuscript.
 
 \section{Reproducibility, Part I}
 \label{sec:repro}
+
+\paragraph{Artifact discipline (before the commands).} Every number in
+this paper is reproduced by one command; every artifact a command produces
+must be able to prove what it is. The workflow rules, some of them learned
+the hard way (Sec.~\ref{b:sec:stress}), are five. (i) Exported files carry
+their provenance (model, category count, pairs, seed, dataset revision)
+both in their metadata and in their filename. (ii) Source folders are
+append-only; analyses run only on a derived archive whose entries are
+deduplicated and named from their content, with a content hash as the
+identity of record. (iii) An artifact whose provenance cannot be
+established from its content is quarantined, not repaired. (iv)
+Predictions are written to file before runs, and failed predictions are
+reported with the same care as confirmed ones. (v) No tool prints an
+automatic verdict: tools print matrices, margins, and distances, and the
+reading belongs to the researcher.
 
 Every number in this paper is reproduced by one command. \texttt{truth\_probe.py}
 runs the controlled experiments (the positive results and falsification
@@ -1994,6 +2252,20 @@ python dictionary_export.py --model Qwen/Qwen2.5-3B --peak 16 --write-layer 17 \
 --k-relations 8
 python dictionary_export.py --model meta-llama/Llama-3.2-3B --peak 9 \
 --write-layer 10 --k-relations 8
+
+# dictionary export at any scale (K, pairs per relation, seed)
+python crea_dizionario.py --models Qwen/Qwen2.5-3B --k-relations 33 \
+       --pairs-per-relation 60 --seed 0 --out-dir dizionari
+
+# consensus sign gauge (Sec. stress; writes <bundle>_gauge.json)
+python reorient_gauge.py archivio/*.pt --mode eigen
+
+# arrangement stress test between two gauged dictionaries
+python arrangement_stress_test.py --a <A_gauge.json> --b <B_gauge.json>
+
+# behavioral know-rate per relation, both models
+python know_rate_per_relation.py --model Qwen/Qwen2.5-3B
+python know_rate_per_relation.py --model meta-llama/Llama-3.2-3B
 \end{verbatim}
 
 \texttt{arrangement\_law.py} carries the canonical matrices transcribed in

@@ -1,0 +1,44 @@
+[A] None   [B] None   K=33
+
+THE LAW @ this protocol   Mantel r = +0.559   p = 0.0001   Spearman = +0.549   (K'=33)
+surface control (early)   Mantel r = +0.719   p = 0.0001
+
+within-AUC (A|B): P101 0.81|0.64  P103 0.97|0.84  P106 0.45|0.40  P108 0.84|0.78  P127 0.96|0.47  P1303 0.42|0.58  P131 0.99|0.97  P136 0.69|0.65  P138 0.98|0.97  P140 0.85|0.79  P1412 0.96|0.72  P159 0.96|0.79  P17 0.99|0.90  P176 1.00|0.93  P178 0.97|0.70  P19 0.90|0.56  P190 0.61|0.49  P20 0.90|0.44  P27 0.97|0.53  P276 0.99|0.94  P30 0.73|0.77  P36 1.00|0.99  P364 0.66|0.63  P37 0.96|0.41  P39 0.60|0.61  P407 0.97|0.43  P413 0.67|0.58  P449 0.67|0.57  P463 0.82|0.80  P495 0.92|0.52  P641 0.95|0.59  P740 0.87|0.54  P937 0.93|0.81
+restricted set (within-AUC >= 0.6 on BOTH): ['P101', 'P103', 'P108', 'P131', 'P136', 'P138', 'P140', 'P1412', 'P159', 'P17', 'P176', 'P178', 'P276', 'P30', 'P36', 'P364', 'P39', 'P463', 'P937']
+THE LAW, restricted       Mantel r = +0.744   p = 0.0001   (K'=19; note: with K'<6 the permutation floor limits p)
+
+SYMBIOSIS  per-category adherence corr(row_A, row_B) vs knowledge proxy min(within-AUC):
+  P17    adherence +0.694   knowledge 0.90
+  P937   adherence +0.676   knowledge 0.81
+  P159   adherence +0.661   knowledge 0.79
+  P36    adherence +0.650   knowledge 0.99
+  P276   adherence +0.638   knowledge 0.94
+  P131   adherence +0.636   knowledge 0.97
+  P176   adherence +0.631   knowledge 0.93
+  P27    adherence +0.629   knowledge 0.53
+  P178   adherence +0.627   knowledge 0.70
+  P103   adherence +0.613   knowledge 0.84
+  P19    adherence +0.605   knowledge 0.56
+  P138   adherence +0.604   knowledge 0.97
+  P740   adherence +0.587   knowledge 0.54
+  P101   adherence +0.574   knowledge 0.64
+  P108   adherence +0.552   knowledge 0.78
+  P463   adherence +0.548   knowledge 0.80
+  P20    adherence +0.528   knowledge 0.44
+  P140   adherence +0.526   knowledge 0.79
+  P30    adherence +0.492   knowledge 0.73
+  P190   adherence +0.463   knowledge 0.49
+  P641   adherence +0.416   knowledge 0.59
+  P136   adherence +0.400   knowledge 0.65
+  P407   adherence +0.354   knowledge 0.43
+  P127   adherence +0.326   knowledge 0.47
+  P106   adherence +0.300   knowledge 0.40
+  P37    adherence +0.299   knowledge 0.41
+  P1412  adherence +0.298   knowledge 0.72
+  P495   adherence +0.179   knowledge 0.52
+  P1303  adherence +0.093   knowledge 0.42
+  P449   adherence +0.060   knowledge 0.57
+  P413   adherence -0.214   knowledge 0.58
+  P39    adherence -0.226   knowledge 0.60
+  P364   adherence -0.333   knowledge 0.63
+  rank-correlation (Spearman) adherence ~ knowledge: +0.649   Pearson: +0.493   (registered prediction: positive)

@@ -45,6 +45,10 @@ pip install torch transformers datasets
 python src/truth_probe.py signal --dataset builtin --with-2d --baseline --perm 200
 ```
 
+## Note
+
+The code was generated using an LLM, subject to my full decision-making and review, and to refine specific terminology necessitated by the translation from Italian to English.
+
 ## Cite
 
 Francesco Karim Vicidomini, *The Anatomy of a Truth Direction*, 2026.

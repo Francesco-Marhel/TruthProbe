@@ -41,9 +41,20 @@ def collect_components(model, tok, items, dev):
         return hook
 
     handles = []
+    # Sandwich-norm detection (Gemma-2/3): in those architectures the vector
+    # added to the residual is post_*_layernorm(module_out), NOT module_out.
+    # Detector: pre+post feedforward norms exist ONLY in sandwich models.
+    # (Do not key on post_attention_layernorm alone: in Llama/Qwen that module
+    # exists but is the PRE-norm of the MLP, a naming trap.)
+    sandwich = (hasattr(layers[0], "pre_feedforward_layernorm")
+                and hasattr(layers[0], "post_feedforward_layernorm"))
     for i, layer in enumerate(layers):
-        handles.append(layer.self_attn.register_forward_hook(mk_hook(f"attn{i}")))
-        handles.append(layer.mlp.register_forward_hook(mk_hook(f"ffn{i}")))
+        if sandwich:
+            handles.append(layer.post_attention_layernorm.register_forward_hook(mk_hook(f"attn{i}")))
+            handles.append(layer.post_feedforward_layernorm.register_forward_hook(mk_hook(f"ffn{i}")))
+        else:
+            handles.append(layer.self_attn.register_forward_hook(mk_hook(f"attn{i}")))
+            handles.append(layer.mlp.register_forward_hook(mk_hook(f"ffn{i}")))
 
     H_resid, H_attn, H_ffn = [], [], []
     try:

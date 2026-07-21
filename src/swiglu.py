@@ -175,10 +175,15 @@ def cells_framing(fact, is_true, is_prud, facts_subset):
 # =====================================================================
 #  extraction: residual + last-token g, u per band layer
 # =====================================================================
-def collect_gu(model, tok, items, dev, layers_wanted):
-    """Returns H_resid [N, L+1, d], G {l: [N, d_i]}, U {l: [N, d_i]} (last token)."""
+def collect_gu(model, tok, items, dev, layers_wanted, capture_ffn_out=False):
+    """Returns H_resid [N, L+1, d], G {l: [N, d_i]}, U {l: [N, d_i]} (last token).
+    With capture_ffn_out=True also returns F {l: [N, d]}: the vector the FFN
+    ACTUALLY adds to the residual stream (post_feedforward_layernorm output on
+    sandwich-norm models like Gemma-2/3; raw mlp output on pre-norm models)."""
     layers = model.model.layers
     buf = {}
+    sandwich = (hasattr(layers[layers_wanted[0]], "pre_feedforward_layernorm")
+                and hasattr(layers[layers_wanted[0]], "post_feedforward_layernorm"))
 
     def mk_hook(name):
         def hook(_m, _i, out):
@@ -189,10 +194,14 @@ def collect_gu(model, tok, items, dev, layers_wanted):
     for i in layers_wanted:
         handles.append(layers[i].mlp.act_fn.register_forward_hook(mk_hook(f"g{i}")))
         handles.append(layers[i].mlp.up_proj.register_forward_hook(mk_hook(f"u{i}")))
+        if capture_ffn_out:
+            mod = layers[i].post_feedforward_layernorm if sandwich else layers[i].mlp
+            handles.append(mod.register_forward_hook(mk_hook(f"f{i}")))
 
     H_resid = []
     G = {i: [] for i in layers_wanted}
     U = {i: [] for i in layers_wanted}
+    F = {i: [] for i in layers_wanted}
     try:
         for n, (_, txt) in enumerate(items):
             buf.clear()
@@ -202,15 +211,20 @@ def collect_gu(model, tok, items, dev, layers_wanted):
             H_resid.append(torch.stack([h[0, -1, :].detach().float().cpu() for h in hs], 0))
             for i in layers_wanted:
                 G[i].append(buf[f"g{i}"]); U[i].append(buf[f"u{i}"])
+                if capture_ffn_out:
+                    F[i].append(buf[f"f{i}"])
             if (n + 1) % 10 == 0 or n + 1 == len(items):
                 print(f"\r[extract] {n+1}/{len(items)} sentences", end="", flush=True)
         print()
     finally:
         for h in handles:
             h.remove()
-    return (torch.stack(H_resid, 0),
-            {i: torch.stack(v, 0) for i, v in G.items()},
-            {i: torch.stack(v, 0) for i, v in U.items()})
+    out = (torch.stack(H_resid, 0),
+           {i: torch.stack(v, 0) for i, v in G.items()},
+           {i: torch.stack(v, 0) for i, v in U.items()})
+    if capture_ffn_out:
+        return out + ({i: torch.stack(v, 0) for i, v in F.items()},)
+    return out
 
 
 def load_all(a, dataset_items=None):
@@ -238,11 +252,20 @@ def cmd_attrib(a):
     print(f"[note] w = W_down^T v1 (residual axis pulled back; NO fitting in 8960-dim)")
     print(f"[note] v1 from intact residual @block {a.axis_block}, train folds only")
     dev, tok, model, items, pidx = load_all(a)
-    H_resid, G, U = collect_gu(model, tok, items, dev, scan)
+    layers_mod = model.model.layers
+    sandwich = (hasattr(layers_mod[scan[0]], "pre_feedforward_layernorm")
+                and hasattr(layers_mod[scan[0]], "post_feedforward_layernorm"))
+    eps = float(getattr(model.config, "rms_norm_eps", 1e-6))
+    if sandwich:
+        print("[note] SANDWICH NORM detected (Gemma-2/3): the residual contribution is")
+        print("       post_ffw_norm(mlp_out) = (mlp_out / rms(mlp_out)) * (1+gamma).")
+        print("       Exact 3-term split: pair gap = s_bar*gate + s_bar*value + Ds*P_bar")
+        print("       with w = W_down^T((1+gamma) v1), P = w.(g*u), s = 1/rms(mlp_out).")
+    H_resid, G, U, F = collect_gu(model, tok, items, dev, scan, capture_ffn_out=True)
 
     # exactness check on real data (identity gate + value == total)
     Lb0 = scan[0]
-    w0 = (model.model.layers[Lb0].mlp.down_proj.weight.detach().float().cpu().T
+    w0 = (layers_mod[Lb0].mlp.down_proj.weight.detach().float().cpu().T
           @ torch.randn(H_resid.shape[2]))
     it0, if0 = pidx[0]
     g1, v1_, t1 = gate_value_split(G[Lb0][it0], U[Lb0][it0], G[Lb0][if0], U[Lb0][if0], w0)
@@ -251,29 +274,72 @@ def cmd_attrib(a):
     if err > 1e-3:
         print("  ABORT: split identity violated."); return
 
+    # end-to-end check: the split total must equal the projection of the vector
+    # the FFN ACTUALLY adds to the residual (captured at the norm output on
+    # sandwich models). Random probe direction, pair 0, first scan layer.
+    Wd0 = layers_mod[Lb0].mlp.down_proj.weight.detach().float().cpu()
+    gam0 = (1.0 + layers_mod[Lb0].post_feedforward_layernorm.weight
+            .detach().float().cpu()) if sandwich else torch.ones(Wd0.shape[0])
+    vprobe = torch.randn(Wd0.shape[0]); vprobe = vprobe / vprobe.norm()
+    w_chk = Wd0.T @ (vprobe * gam0)
+    Pt = float((G[Lb0][it0] * U[Lb0][it0]) @ w_chk)
+    Pf = float((G[Lb0][if0] * U[Lb0][if0]) @ w_chk)
+    if sandwich:
+        xt = Wd0 @ (G[Lb0][it0] * U[Lb0][it0]); xf = Wd0 @ (G[Lb0][if0] * U[Lb0][if0])
+        st = 1.0 / float(torch.sqrt(xt.pow(2).mean() + eps))
+        sf = 1.0 / float(torch.sqrt(xf.pow(2).mean() + eps))
+    else:
+        st = sf = 1.0
+    rhs = st * Pt - sf * Pf
+    lhs = float(vprobe @ (F[Lb0][it0] - F[Lb0][if0]))
+    err2 = abs(rhs - lhs) / max(abs(lhs), 1e-6)
+    print(f"[identity check, residual] |split_total - v.(f_t-f_f)|/|.| = {err2:.2e}"
+          f"  (must be ~0)")
+    if err2 > 1e-3:
+        print("  ABORT: the split does not reconstruct the true residual"
+              " contribution (unknown MLP/norm wiring for this architecture)."); return
+
     Hax = H_resid[:, a.axis_block + 1, :]
-    print(f"\n{'layer':>5} | {'gate term':>10} {'value term':>11} {'total':>9} | "
-          f"{'gate share':>10}")
-    print("-" * 60)
+    print(f"\n{'layer':>5} | {'gate term':>10} {'value term':>11} {'norm term':>10} "
+          f"{'total':>9} | {'gate share':>10}")
+    print("-" * 75)
     for Lb in scan:
-        Wd = model.model.layers[Lb].mlp.down_proj.weight.detach().float().cpu()  # [d, d_i]
-        gate_ms, val_ms, tot_ms = [], [], []
+        Wd = layers_mod[Lb].mlp.down_proj.weight.detach().float().cpu()  # [d, d_i]
+        if sandwich:
+            gamma = (1.0 + layers_mod[Lb].post_feedforward_layernorm.weight
+                     .detach().float().cpu())
+            X = (G[Lb] * U[Lb]) @ Wd.T                       # [N, d] raw mlp out
+            s_all = 1.0 / torch.sqrt(X.pow(2).mean(-1) + eps)  # [N]
+        gate_ms, val_ms, nrm_ms, tot_ms = [], [], [], []
         for tr, te in T.kfold_pairs(len(pidx), a.folds, a.seed):
             ax = T.fit_axis(Hax, [pidx[p] for p in tr])
-            w = Wd.T @ ax["v1"]                              # [d_i]
-            gs, vs, ts = [], [], []
+            w = Wd.T @ ((ax["v1"] * gamma) if sandwich else ax["v1"])  # [d_i]
+            gs, vs, ns, ts = [], [], [], []
             for p in te:
                 it, iff = pidx[p]
                 gt, vt, tt = gate_value_split(G[Lb][it], U[Lb][it],
                                               G[Lb][iff], U[Lb][iff], w)
-                gs.append(float(gt)); vs.append(float(vt)); ts.append(float(tt))
+                gt, vt, tt = float(gt), float(vt), float(tt)
+                if sandwich:
+                    Pt = float((G[Lb][it] * U[Lb][it]) @ w); Pf = Pt - tt
+                    st, sf = float(s_all[it]), float(s_all[iff])
+                    sbar, ds, Pbar = (st + sf) / 2, st - sf, (Pt + Pf) / 2
+                    gs.append(sbar * gt); vs.append(sbar * vt)
+                    ns.append(ds * Pbar); ts.append(st * Pt - sf * Pf)
+                else:
+                    gs.append(gt); vs.append(vt); ns.append(0.0); ts.append(tt)
             gate_ms.append(sum(gs) / len(gs)); val_ms.append(sum(vs) / len(vs))
-            tot_ms.append(sum(ts) / len(ts))
+            nrm_ms.append(sum(ns) / len(ns)); tot_ms.append(sum(ts) / len(ts))
         gm = sum(gate_ms) / len(gate_ms); vm = sum(val_ms) / len(val_ms)
-        tm = sum(tot_ms) / len(tot_ms)
-        share = gm / tm if abs(tm) > 1e-8 else float("nan")
+        nm = sum(nrm_ms) / len(nrm_ms); tm = sum(tot_ms) / len(tot_ms)
+        # share is meaningless when gate and value nearly CANCEL (total ~ 0):
+        # the ratio divides by a small difference of large terms.
+        cancel = abs(tm) < 0.25 * (abs(gm) + abs(vm))
+        share_s = "   n/a(cxl)" if cancel else f"{gm / tm:>+10.2f}" \
+            if abs(tm) > 1e-8 else "       n/a"
         band = "<- band" if a.band_start <= Lb <= a.band_end else ""
-        print(f"{Lb:>5} | {gm:>+10.3f} {vm:>+11.3f} {tm:>+9.3f} | {share:>10.2f} {band}")
+        print(f"{Lb:>5} | {gm:>+10.3f} {vm:>+11.3f} {nm:>+10.3f} {tm:>+9.3f} | "
+              f"{share_s} {band}")
 
     print("\n=== reading guide ===")
     print("  total = FFN's mean intra-pair gap on the truth axis (matches contrib's gap_ffn).")
@@ -282,6 +348,9 @@ def cmd_attrib(a):
     print("  dominant -> the content itself is anti-truth. Around the peak (total > 0):")
     print("  the same split tells you how the PRO-truth writing is built at 13-15.")
     print("  gate share > 1 with value share < 0 (or vice versa) = the two terms FIGHT.")
+    print("  norm term (sandwich models only): class-driven RESCALING by the post-FFN")
+    print("  RMSNorm (Ds*P_bar). Small -> the story is in gate/value as elsewhere;")
+    print("  large -> Gemma modulates truth by shrinking/growing the whole write.")
 
 
 # =====================================================================

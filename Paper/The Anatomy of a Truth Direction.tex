@@ -30,38 +30,17 @@ and three working notes on the cross-family mechanics and category geometry
 (Part~II). Every number in both parts was regenerated under a single uniform
 protocol on July 9--10, 2026; the stress tests of Part~II were run
 July 15--17, 2026 under the same contract. Corrections of the author's own published
-interpretations are reported inside the text, as results.}}
+interpretations are reported inside the text, as results. Version 2 adds a
+replication campaign on a third model family (Gemma-2-2b, five models
+overall), run July 18--21, 2026 under the same contract; it reports two
+further corrections of tooling and two falsified registered diagnoses, as
+results.}}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-B\"urger et al.\ (2024) demonstrated that truth representations in large
-language models are universal across statement polarity but reside within a
-multidimensional subspace. We extend that framework along three questions:
-how the dimensionality of the subspace depends on the model's knowledge,
-which architectural component builds the truth direction, and what the
-direction is a mixture of. In Part~I (one model), a training-free
-directional probe derived from the SVD of hidden-state minimal pairs shows
-that the dimensionality of truth is knowledge-dependent: the signal is
-concentrated on a single axis for behaviorally known facts (held-out AUC
-$0.938$) and becomes diffuse as knowledge decreases or material
-heterogeneity increases; seven falsification experiments sustain the
-one-dimensional reading, and the same decomposition recovers the supervised
-polarity direction of B\"urger et al.\ at cosine $0.959$ without polarity
-labels. In Part~II (four base models, two families, pre-registered
-predictions), a relational law emerges: attention propagates truth frames
-it did not write, the feed-forward network opposes the frame of its current
-block, and the genuine post-peak decay is causally attributed on all four
-models to the SwiGLU value stream; per-category truth axes form a
-semantically signed arrangement that contradicts the lexical surface and
-converges across families (Mantel $p = 0.0009$). Stress tests at three
-scales ($33$ categories, $888$ pairs per relation, six sampling seeds)
-expose a sign instability of the per-category orientation, repair it with a
-declared spectral consensus gauge, and sharpen the convergence into a
-knowledge-gated law, strengthening from $+0.42$ on dense mixed-knowledge
-material to $+0.74$ on knowledge-restricted categories: the geometry of the
-mixture belongs to the knowledge domain rather than to the architecture.
+B\"urger et al.\ (2024) demonstrated that truth representations in large language models are universal across statement polarity but reside within a multidimensional subspace. We extend this framework along three questions: how the dimensionality of the subspace depends on the model’s knowledge, which architectural component builds the truth direction, and what the direction is a mixture of. In Part I, a training-free directional probe derived from the SVD of hidden-state minimal pairs shows that the dimensionality of truth is knowledge-dependent: the signal concentrates on a single axis for known facts and diffuses as knowledge decreases. In Part II, a relational law emerges across multiple model families: attention propagates truth frames, the feed-forward network opposes the current block's frame, and post-peak decay is causally attributed to the SwiGLU value stream. Furthermore, per-category truth axes form a semantically signed arrangement that converges across families. Stress tests expose a sign instability in this orientation, which we repair with a spectral consensus gauge to sharpen the convergence into a knowledge-gated law. Finally, a replication campaign on Gemma-2-2b, extending our decomposition tools to accommodate its sandwich normalization, confirms these laws and attributions. We quantify the knowledge gate as classical attenuation and isolate a stable, model-specific private geometry.
 \end{abstract}
 
 \section{Introduction}
@@ -108,7 +87,7 @@ $0.959$. An exact attention/FFN decomposition then locates the axis
 anatomically: attention builds the signal in the middle layers, causally,
 and the FFN degrades it after the readability peak.
 
-\textbf{Part~II} (four base models, two families) turns the anatomy into
+\textbf{Part~II}  (Five base models, three families) Turns the anatomy into
 laws. The FFN's apparent pro-truth write at the peak and flip to anti-truth
 at the next block, replicated under pre-registered predictions, is exposed
 by an axis-provenance control as the special case of a \emph{relational
@@ -134,7 +113,12 @@ category count, a higher pair density, and re-sampled pairs; they
 expose, and repair with a declared spectral gauge, a sign instability
 of the per-category orientation, and they sharpen the arrangement claim
 into a knowledge-gated law. The knowledge-dependent gap of Part~I is, in hindsight, this
-mixture seen from one direction.
+mixture seen from one direction. A third family, added in this version,
+closes the loop: Sec.~\ref{b:sec:gemma} replicates the mechanics and the
+geometry on Gemma-2-2b, promotes the convergence claim from law-candidate
+to law at the registered protocol, and opens a new question, a
+model-private geometry beyond the knowledge gate, with its falsification
+pre-registered.
 
 The two parts share every methodological choice: the same pinned dataset
 revision, the same held-out protocol over pairs, the same permutation-null
@@ -222,7 +206,7 @@ representations~\cite{platonic2024}.
 \section{Scope and evidence}
 \label{sec:scope}
 
-Everything in this paper concerns one small base model, Qwen2.5-1.5B, and
+Everything in Part I concerns one small base model, Qwen2.5-1.5B, and
 sentence-level factual statements. Results come in two evidential tiers, and
 we keep them distinct throughout. \textbf{Tier 1} (Secs.~\ref{sec:results}
 and~\ref{sec:robust}): the positive findings and the falsification battery,
@@ -248,16 +232,10 @@ and study the geometry of these vectors.
 \paragraph{Pooling and the token-identity confound.} All states are read
 at the last token, and in minimal pairs the flipped content word sits at
 or immediately before that position: token identity is therefore a
-candidate confound for everything downstream. Three measurements bound
-it. First, the per-layer curves start at chance in every scan (layer-$0$
-AUC $= 0.500$ on all four models): a token-identity axis would separate
-already at the embedding, and it does not; the signal emerges only with
-depth, that is, with context integration. Second, all AUCs are held-out
-across pairs whose targets are disjoint, which a pure target-identity
-direction would not survive at the measured levels. Third, the category
-analysis carries its own lexical control: the block-$2$ baseline decodes
-the relation at $39$--$42\%$ against $74$--$82\%$ for the peak-adjacent
-FFN writes. The extraction tool also supports mean pooling
+candidate confound for everything downstream. The four controls that
+bound it are declared, together with the other lexical confounds, at the
+end of Sec.~\ref{sec:data}, where a careful reader will demand them.
+The extraction tool also supports mean pooling
 (\texttt{--pool mean}); the last-token results are the canonical ones,
 and the mean-pooling replication is listed as a cheap robustness run
 rather than assumed.
@@ -287,7 +265,7 @@ that the model demonstrably reproduces in open-ended completion
 (Sec.~\ref{sec:future}); they play the role of a known-facts control:
 behaviorally verified and token-matched, hence also clean, in the sense of
 free of the sentence-format confounds discussed in Sec.~\ref{sec:limits}.
-The external datasets are CounterFact~\cite{counterfact} and
+The external datasets are CounterFact~\cite{meng2022} and
 TruthfulQA~\cite{truthfulqa} ($250$ pairs, pinned revisions in
 Sec.~\ref{sec:repro}), which contain many relations a $1.5$B model plausibly
 does not know.
@@ -310,10 +288,10 @@ between families, so cross-family comparisons carry a systematic bias
 component, while within a family the bias is shared and cancels. This is
 why the dimensionality relation is stated as within-family monotone with a
 cross-family offset, and why the ordering Llama-3.2-1B ($35.5\%$) above
-Qwen2.5-1.5B ($30.0\%$) is neither exotic nor load-bearing: parameter
-count is not knowledge (the two models differ in training data, tokenizer,
-and completion style), and no claim in this manuscript rests on comparing
-know-rates across families.
+Qwen2.5-1.5B ($30.0\%$) is neither exotic nor load-bearing. Parameter
+count is not knowledge: the two models differ in training data, tokenizer,
+and completion style, and no claim below compares know-rates across
+families.
 
 
 
@@ -562,7 +540,7 @@ ingredient alone would suggest. A single direction fit across heterogeneous
 material must serve all of it at once, while the full probe is free to
 combine directions; the excess gap on the mix therefore measures how much the
 truth direction itself varies with the material. Subsequent work confirms
-this reading independently Part~II: the
+this reading independently (Part~II): the
 per-category truth axes form a structured, semantically signed geometry, and
 forcing one axis onto a mixture of categories is exactly what the mix row
 pays for.
@@ -1015,10 +993,8 @@ to it), and the single projection recovers almost all of it (position AUC
 $0.795$, near the full-probe ceiling). When the model does not know a fact,
 there is no dedicated direction: the weak truth-relevant signal remains
 distributed across many superposed features, and no single axis can pull it
-out of the tangle. Recovering it would require asking the question once per
-dictionary atom, the expansion that a sparse autoencoder performs at cost
-$O(d\,m)$, which is a different operation from a single projection, not a
-cheaper version of it.
+out of the tangle; recovering it is exactly the per-atom expansion of
+Sec.~\ref{sec:discussion}, not a cheaper projection.
 
 The consequence is exactly what the visual observations show. On known facts
 the truth occupies its own direction, the classes form two regions, and the
@@ -1030,8 +1006,7 @@ the probe structurally cannot resolve. The probe gaps of
 Sec.~\ref{sec:dim} and the low centroid ratio measured here are views of the
 same quantity: the truth information that lives off-axis on facts the model
 does not know ($0.062$), inflated further when heterogeneous material forces
-one axis to serve many truth frames at once ($0.203$). Subsequent work
-Part~II begins to resolve that superposed
+one axis to serve many truth frames at once ($0.203$). The subsequent work of Part~II begins to resolve that superposed
 remainder into named, signed components: what this paper can only call
 unresolved superposition acquires, there, a geometry.
 
@@ -1156,12 +1131,14 @@ own flip interpretation, has its own section (\ref{b:sec:correction}).
 \section{Setup}
 \label{b:sec:setup}
 
-Four base (non-instruct) models across two families:
+Five base (non-instruct) models across three families (the Gemma-2-2b
+campaign is reported in Sec.~\ref{b:sec:gemma}; its architecture requires
+the decomposition extension of Sec.~\ref{b:sec:sandwich}):
 
 \begin{table}[H]
 \centering
 \caption{Models. The truth peak $p$ is the block whose intact residual
-maximizes held-out truth AUC (protocol of (Part~I)); ``block $b$''
+maximizes held-out truth AUC (protocol of Part~I); ``block $b$''
 denotes the output of transformer block $b$. Know-rate: fraction of $200$
 CounterFact prompts whose true target the model reproduces under greedy
 decoding (seed $0$), measured before any geometry. Axis and probe AUC:
@@ -1175,12 +1152,13 @@ Qwen2.5-1.5B  & $28$ & $1536$ & $15$ & $30.0\%$ ($61/200$) & $0.792$ & $0.854$ &
 Qwen2.5-3B    & $36$ & $2048$ & $16$ & $37.0\%$ ($74/200$) & $0.832$ & $0.881$ & $0.049$ \\
 Llama-3.2-1B  & $16$ & $2048$ & $7$  & $35.5\%$ ($71/200$) & $0.690$ & $0.831$ & $0.141$ \\
 Llama-3.2-3B  & $28$ & $3072$ & $9$  & $41.0\%$ ($82/200$) & $0.785$ & $0.897$ & $0.112$ \\
+Gemma-2-2b    & $26$ & $2304$ & $11$ & $34.0\%$ ($68/200$) & $0.776$ & $0.875$ & $0.099$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 Two regularities and one boundary, extending the dimensionality claim
-of (Part~I): within each family the gap decreases as the know-rate
+of Part~I: within each family the gap decreases as the know-rate
 increases; across families a family-level offset remains, with Qwen
 concentrating more of the truth signal on the single axis at comparable
 knowledge. An earlier version of this table imported the Qwen2.5-1.5B row
@@ -1188,12 +1166,15 @@ from the first part's mixed-dataset column while the other rows were
 measured on CounterFact alone, a protocol inhomogeneity caught by
 re-measurement; all rows above come from one command under one protocol,
 and the earlier phrasing that the gap ``tracks knowledge every time'' is
-retired in favor of the two-part statement.
+retired in favor of the two-part statement. The fifth row adds a third
+family-level offset: at know-rate $34.0\%$ the Gemma gap ($0.099$) sits
+between the Qwen offsets ($0.049$--$0.062$) and the Llama offsets
+($0.112$--$0.141$).
 
 Dataset: \texttt{NeelNanda/counterfact-tracing} (pinned revision
 \texttt{c945b08\ldots}, loaded as Parquet only), $250$ minimal pairs unless
 stated. Decomposition runs use \texttt{float32} and are gated by the
-additive identity check of (Part~I) (median relative errors
+additive identity check of Part~I (median relative errors
 $0.65$--$1.23 \times 10^{-7}$ across the runs of this paper);
 extraction-only runs use \texttt{bfloat16}. The spread of the four peaks in
 relative depth ($0.32$--$0.54$) already anticipates the negative of
@@ -1251,6 +1232,47 @@ w \cdot (g_t \odot u_t - g_f \odot u_f)
 \label{b:eq:split}
 \end{equation}
 Verified numerically at $7.4 \times 10^{-8}$ relative error on real data.
+
+\subsection{Sandwich normalization: the exact decomposition on Gemma-2}
+\label{b:sec:sandwich}
+
+Gemma-2 is not a pure pre-norm transformer: inside each block, the vector
+added to the residual stream is not the module output but that output passed
+through a further RMSNorm \\(\texttt{post\_attention\_layernorm} and
+\texttt{post\_feedforward\_layernorm} in the reference implementation).
+Three consequences, each verified. (i) \emph{Capture.} The additive
+contributions $a_b, f_b$ are read by hooks at the outputs of the two
+post-norms; hooking the modules themselves, correct on Qwen and Llama,
+fails the additive identity check on Gemma at median relative error $0.94$,
+and the corrected hooks restore it to $8.0 \times 10^{-8}$. Detection is by
+the joint presence of the pre- and post-feedforward norms, never by the
+name \texttt{post\_attention\_layernorm}, which exists on Llama and Qwen as
+the \emph{pre}-norm of the MLP, a naming trap. (ii) \emph{Ablation.}
+Replacing a module output by zero still contributes zero after the norm
+(RMSNorm of the zero vector is zero), so every ablation and freeze of
+Sec.~\ref{b:sec:interventions} carries over unchanged. (iii) \emph{The
+split.} With $n(x) = (x/\mathrm{rms}(x)) \odot (1+\gamma)$ interposed
+between the FFN and the residual, the projection of the true contribution
+decomposes exactly into three terms,
+\begin{equation}
+v_1 \cdot \big(n(x_t) - n(x_f)\big)
+= \bar{s}\,\underbrace{w \cdot (\Delta g \odot \bar u)}_{\text{gate}}
+\;+\; \bar{s}\,\underbrace{w \cdot (\bar g \odot \Delta u)}_{\text{value}}
+\;+\; \underbrace{\Delta s\, \bar P}_{\text{norm}},
+\label{b:eq:sandwich}
+\end{equation}
+with $w = W_{\mathrm{down}}^{\top}\big((1+\gamma) \odot v_1\big)$,
+$P = w \cdot (g \odot u)$, $s = 1/\mathrm{rms}(x)$,
+$x = W_{\mathrm{down}}(g \odot u)$, and $\bar{\cdot}\,, \Delta$ the
+intra-pair mean and difference. The identity is verified end-to-end
+against the captured post-norm contribution at $5.0 \times 10^{-7}$; the
+norm term measures class-driven rescaling by the post-FFN norm and is
+reported alongside gate and value. Gemma's gating activation is a GELU
+rather than a SiLU (GeGLU rather than SwiGLU); the $g \odot u$ structure
+is identical, and we say \emph{gated-MLP split} where both are meant. On
+the pre-norm models the code path is unchanged, the norm term is
+identically zero, and a regression run on Qwen2.5-1.5B reproduces the
+canonical numbers of Parts~I--II to the third decimal.
 
 \subsection{Interventions}
 \label{b:sec:interventions}
@@ -1932,6 +1954,163 @@ truth-mixture arrangement across families is knowledge-gated, and its
 strength is a monotone function of how well both models know the
 categories being compared.
 
+\section{A third family: replication, promotion, and a private geometry}
+\label{b:sec:gemma}
+
+This section reports a full replication campaign on Gemma-2-2b, the first
+model outside the two anchor families, run stage by stage under the
+contract of this paper: predictions written before every run, behavioral
+know-rate before any geometry, and failed predictions reported as results
+(this section contains three). Landmarks: truth peak at block $11$
+(relative depth $0.42$, inside the $0.32$--$0.54$ spread of
+Table~\ref{b:tab:models}); know-rate $34.0\%$; axis $0.776$ against probe
+$0.875$ (Table~\ref{b:tab:models}).
+
+\paragraph{An accidental replication, again.} A units slip (the signal
+tool reports hidden levels, the landmark file expects blocks) first placed
+the analysis frame at block $12$, one past the peak. The result was pro at
+$12$ ($+1.744$, $d' = +0.61$) and anti at $13$ ($-0.608$, $d' = -0.25$):
+the relational law at a frame no one chose, the third accidental
+confirmation of this series. The orchestration now prints both
+conventions; all numbers below are from the corrected landmarks.
+
+\paragraph{The mechanics replicate.} The flip: FFN gap $+3.843 \pm 0.004$
+at the peak, $-1.673 \pm 0.007$ at peak$+1$ ($d'$ $+0.94$/$-0.59$,
+$\hat p = 0.0099$); the rotation check jumps sign in a single step with
+the write magnitude intact (cosine $+0.496 \to -0.245$, delta $-0.741$,
+numerically coinciding with the Qwen2.5-1.5B value). Pre-frame diagonals:
+FFN $-0.12$/$-0.22$/$-0.80$ at rulers $9$/$11$/$13$, attention
+$+0.19$/$+1.59$/$+1.40$: the propagate/overwrite mirror holds on the fifth
+model, with the FFN side shallower at the peak than in the anchors.
+Erosion over the band $12$--$14$: intact $0.715$, FFN-off $0.838$,
+attention-off $0.580$, frozen reference $0.777$; FFN-off beats frozen by
+$+0.061$, the active-erosion side of the family-dependent observation of
+Sec.~\ref{b:sec:erosion}, and the attention-off collapse ($-0.135$) places
+the post-peak tug-of-war at $2.6$B parameters, supporting the scale
+reading of Sec.~\ref{b:sec:traits}. The gated-MLP split
+(Eq.~\ref{b:eq:sandwich}): at the flip, gate $+0.495$, value $-2.183$,
+norm $+0.026$, total $-1.662$, matching the independently measured FFN gap
+to the second decimal; the norm term stays within $[-0.141, +0.086]$ over
+the whole scan, so Gemma does not modulate truth by rescaling its writes;
+the causal freezes recover $+0.072$ (value) against $+0.022$ (gate, under
+the stability floor): \emph{the value stream carries the erosion on the
+fifth architecture out of five}. Two observations, declared as such: in
+the erosion band the gate term is positive while the value term is
+negative, an intra-FFN opposition absent in the anchors, measured under a
+peak frame and therefore observational; and attention at peak$+1$ writes
+negative under every frame and returns positive at peak$+2$ ($+0.84$,
+$+1.40$ under the peak-adjacent pre frames), a blink the anchors do not
+show, recorded as a Tier~C lead. A registered prediction on the gating
+(GeGLU being closer to linear, a smaller gate share of the pro-truth
+construction at the peak) reads $0.62$ against Qwen2.5-1.5B's $0.67$:
+compatible in sign, unresolved without error bars, recorded as such.
+
+\paragraph{A registered miss on the circuits.} The prediction, written
+before the run, placed the OV/QK crossover between blocks $16$ and $20$,
+far from the peak, as on all four models of
+Sec.~\ref{b:sec:negatives}. Outcome: the crossover criterion fires at
+block $11$, the peak itself. The profile explains without excusing: on
+Gemma the median-normalized ratio is flat across depth ($0.89$--$1.24$,
+margin above $1$ of $0.04$--$0.05$, no late explosion), so the landmark is
+weakly identified and a knife-edge criterion picked the peak. The
+registered prediction is missed as written; the pre-registered negative
+(static norms do not track the truth peak) neither gains nor loses a
+family, because on Gemma the static profile has no depth structure to
+correlate at all, possibly a signature of its alternating local/global
+attention.
+
+\paragraph{The geometry replicates.} At the peak, the language block
+coheres ($+0.54$ to $+0.69$), continent anti-aligns ($-0.11$ to $-0.21$
+against the block) with one-directional below-chance transfer into it
+($0.20$--$0.31$), and sport-position is near-orthogonal. The extreme cell
+repeats for the third time: languages-spoken and official-language start
+at $\cos = -0.89$ at the embedding (anchors: $-0.90$, $-0.86$) and merge
+at the peak ($+0.63$). Within-category transfer $0.880$ against
+cross-category $0.800$; $\Delta f$ decoding $78.75\%$ against a lexical
+baseline of $42.29\%$ (chance $12.5\%$, $\hat p = 0.0099$); the
+within-model early-to-peak correlation is $-0.040$, the uncorrelated
+regime: the peak arrangement does not inherit the surface. The consensus
+gauge replicates its verdicts: P30 flipped to its semantic negative, P413
+at margin $+0.118$, effectively unsigned. And the P176 anomaly
+replicates: near-perfect incoming transfer from every axis, as on
+Llama-3.2-3B; observed on two families with different tokenizers, the
+surface-structure reading moves from a model quirk to a dataset-level
+flag.
+
+\paragraph{The promotion.} At the registered protocol ($K{=}8$, $60$
+pairs, consensus gauge) the three pairwise cross-family agreements are:
+Qwen--Llama $+0.770$ (Sec.~\ref{b:sec:mixture}), Gemma--Qwen $+0.690$
+($p = 0.0003$), Gemma--Llama $+0.990$ ($p = 0.0001$), the last exceeding
+the anchors' own agreement. All positive, all significant: \emph{the
+arrangement law is promoted from law-candidate to law at this protocol},
+with the template debt of Sec.~\ref{b:sec:limits} intact. At $K{=}33$ the
+gate gradient repeats: Gemma--Qwen $+0.570$ rising to $+0.743$ on the
+$18$ relations known to both; Gemma--Llama $+0.961$, with restriction
+changing nothing ($+0.962$ on $28$); adherence--knowledge Spearman
+$+0.660$ and $+0.885$; and the least-known relation of the pool (P106) is
+the only one with negative adherence in both comparisons. Seed stability:
+six canonical-versus-resampling comparisons on Gemma, all positive,
+$+0.895$ to $+0.988$, the stability class of the high-knowledge anchor
+despite a $34\%$ know-rate: the gate acts on \emph{represented} knowledge
+(fat within-category margins), not on verbalized recall, exactly as
+Sec.~\ref{b:sec:stress} concluded.
+
+\paragraph{The gate is attenuation.} The restricted Gemma--Qwen agreement,
+$+0.743$, reproduces the $+0.744$ of the anchors' restricted comparison:
+two independent clean partners measure the same ceiling against the same
+noisy one. Under a one-factor reading (one shared arrangement observed
+through per-model estimation noise) the triangle yields each family's
+reliability: $\mathrm{rel}(\text{Qwen}, n{=}60) = (0.690 \times 0.770) /
+0.990 = 0.537$, cross-checked against the directly measured
+canonical-versus-resampling mean of $0.588$; $\mathrm{rel}(\text{Gemma}) =
+0.887$; Llama at the ceiling. The knowledge gate of
+Sec.~\ref{b:sec:stress} is thereby quantified as classical attenuation in
+the sense of Spearman (1904): restricting to known categories does not
+change the law, it removes the attenuation.
+
+\paragraph{Beyond the gate: a private geometry, and two falsified
+diagnoses.} At $n{=}888$ with matched pair samples the triangle reads:
+Gemma--Llama $+0.989$, Gemma--Qwen $+0.408$, Qwen--Llama $+0.424$
+(Sec.~\ref{b:sec:stress}). The two clean vertices agree at the ceiling,
+and both agree with Qwen's dense bundle at the same low value: the dense
+deficit is localized in that bundle, with triangulated reliability
+$0.175$. Two registered diagnoses of the deficit were then falsified, and
+are reported as results. First, excluding P495 moves the comparison from
+$+0.408$ only to $+0.441$, not the recovery the per-category-gauge
+analysis of Sec.~\ref{b:sec:stress} suggested. Second, the sign-repair
+diagnostic finds nothing to repair: Qwen@888 against its own sparse
+reference reads $+0.640$ before and after repair, flips none (Gemma:
+$+0.976$, none). Under the consensus gauge the dense deficit is not a
+sign pathology; the P495 statement stands where it was found, under the
+per-category gauge, and the two gauges see two different pathologies at
+two different layers. What survives both falsifications is the finding:
+if the dense bundle's departure from the shared arrangement were
+estimation noise, its agreement with \emph{independent} resamplings of
+the sparse protocol could not exceed the attenuation ceiling of about
+$0.31$ ($\sqrt{0.175 \times 0.537}$); measured on three disjoint
+resamplings it reads $+0.762$, $+0.499$, $+0.441$, comparable to the
+sparse bundles' agreement among themselves ($+0.589$, $+0.643$, $+0.354$)
+and roughly twice the ceiling. At this protocol, about two thirds of the
+stable structure of Qwen's dense bundle is \emph{private}: reproducible
+across independent samples of the knowledge domain, and invisible to both
+other families. The convergence law gains its complement: what converges
+is the shared knowledge; what lies beyond the gate is not only noise,
+part of it is geometry with an owner.
+
+\paragraph{Three registered predictions.} A candidate mechanism is
+declared, not established. The two families at the ceiling are publicly
+documented as distilled students of larger generalist teachers (Llama-3.2
+at these sizes by pruning and distillation from Llama-3.1; Gemma-2-2b by
+knowledge distillation), while Qwen2.5 is trained from scratch on a
+corpus heavy in code and mathematics, the same model whose behavioral
+deflection into code scaffolding on unknown input is recorded in
+Part~I. The falsification is pre-registered: (1) a fourth distilled
+generalist joins Gemma and Llama at or above $+0.95$; (2) a from-scratch
+model on an inspectable open corpus (e.g.\ OLMo-2) shows a measurable
+private component; (3) Qwen2.5-Coder, the extreme of the diet, shows a
+private component larger than Qwen2.5's, and closer to Qwen2.5 than to
+either anchor. Either outcome is content.
+
 \section{The measured dictionary and the sparse contract}
 \label{b:sec:contract}
 
@@ -1960,7 +2139,7 @@ Qwen models the second dimension never added more than $+0.02$. Read
 through the dimensionality relation, this is the expected geometric
 signature of the mid-knowledge regime: as knowledge decreases, off-axis
 components become readable. It refines, and does not contradict, the
-one-dimensionality claim of (Part~I), which was always scoped to
+one-dimensionality claim of Part~I, which was always scoped to
 known facts. No dedicated null on the margin yet.
 
 \paragraph{Per-head anatomy.} The attention contribution is a sum of heads
@@ -1996,8 +2175,15 @@ attribution stands regardless.
 \section{Limitations}
 \label{b:sec:limits}
 
-Four models, two families; a third family would promote the arrangement
-law from law-candidate to law and widen the relational law's base. The pre
+The third-family debt of the first version is paid: five models, three
+families, and the arrangement law is promoted at the registered protocol
+(Sec.~\ref{b:sec:gemma}). New debts replace it. The private-geometry
+finding rests on one dense bundle per family, one gauge, and one
+protocol, and its three predictions are registered but untested; the
+attenuation reading assumes a one-factor structure that a fourth family
+must stress. The circuit-norm landmark is weakly identified on Gemma (a
+flat depth profile), so the pre-registered negative neither gains nor
+loses a family there. The pre
 frame removes the direct containment circularity but not indirect paths
 (accumulated earlier writes shape the pre frame). All measurements use
 last-token states over one dataset (CounterFact, pinned revision) with one
@@ -2014,7 +2200,9 @@ version correlates only weakly with cross-family adherence
 (Sec.~\ref{b:sec:stress}), a divergence crossed templates must
 arbitrate. The consensus gauge is a spectral relaxation: axes with
 near-zero consensus components are reported unsigned rather than
-resolved, and a third family is owed to the gauge as much as to the law. The
+resolved; the third family confirms the gauge's verdicts on both special
+axes (P30 semantically negative, P413 unsigned) without resolving the
+loner. The
 propagate/overwrite reading is a description of measured alignments, not
 yet a circuit-level mechanism; why attention inherits frames and the FFN
 opposes them is the open question this paper sharpens rather than answers.
@@ -2036,6 +2224,11 @@ Stress tests at three scales added the boundary condition: the
 convergence is knowledge-gated, and the gauge that reads its signs must
 itself be declared, because the sign of a weakly known axis is not an
 observable.
+A third family, added in this version, sharpens each movement: the law is
+promoted at its registered protocol, the gate acquires a number through
+classical attenuation, and beyond the gate a first, pre-registered
+sighting of a model-private geometry marks where the next campaign
+begins.
 Between the two movements sits the correction that makes them trustworthy:
 a pre-registered claim of ours, confirmed on three models, was exposed as
 the special case of a better law by a control built against our own
@@ -2268,6 +2461,52 @@ python know_rate_per_relation.py --model Qwen/Qwen2.5-3B
 python know_rate_per_relation.py --model meta-llama/Llama-3.2-3B
 \end{verbatim}
 
+\paragraph{Third family (Gemma-2-2b).} The decomposition tools detect the
+sandwich normalization automatically (Sec.~\ref{b:sec:sandwich}); on the
+pre-norm models their code path, and their numbers, are unchanged
+(regression-checked on Qwen2.5-1.5B). One convention, learned the hard
+way: the signal tool reports \emph{hidden levels}, landmark arguments are
+\emph{blocks} (peak block $=$ best level $-\,1$); the orchestration now
+prints both. Representative commands:
+
+\begin{verbatim}
+python behav_check.py --model google/gemma-2-2b --n 200 --seed 0
+python truth_probe.py signal --model google/gemma-2-2b --dataset counterfact \
+       --max-pairs 250 --baseline --perm 200 \
+       --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
+python anatomy.py --model google/gemma-2-2b --dataset counterfact \
+       --max-pairs 250 --perm 100 \
+       --rev-counterfact c945b082ca08d0a8f3ba227fb78404a09614c36e
+python flip_consolidate.py --model google/gemma-2-2b \
+       --axis-block 11 --flip-layer 12 --scan-start 7 --scan-end 17
+python axis_provenance.py --model google/gemma-2-2b --peak 11 \
+       --scan-start 7 --scan-end 17
+python ffn_erosion.py ablate --model google/gemma-2-2b \
+       --band-start 12 --band-end 14 --readout 14
+python swiglu.py attrib --model google/gemma-2-2b \
+       --axis-block 11 --scan-start 8 --scan-end 15
+python swiglu.py gatefreeze --model google/gemma-2-2b \
+       --band-start 12 --band-end 14 --readout 14
+python circuits.py --model google/gemma-2-2b --dtype bfloat16 \
+       --peak 11 --flip 12
+python categories.py --model google/gemma-2-2b --peak 11 \
+       --write-layer 12 --k-relations 8
+
+# dictionaries at every scale (K in {8, 33}; n in {60, 888}; seeds)
+python crea_dizionario.py --models google/gemma-2-2b --peak 11 \
+       --write-layer 12 --k-relations 8 --pairs-per-relation 888 \
+       --seed 0 --out-dir diz_gemma/K8_n888_s0
+python reorient_gauge.py "diz_gemma/*/*.pt" --mode eigen
+
+# triangles, exclusion test, and sign-repair diagnostic
+python arrangement_stress_test.py --a <anchor_gauge.json> --b <gemma_gauge.json>
+python arrangement_stress_test.py --a <qwen888_gauge.json> \
+       --b <gemma888_gauge.json> --exclude P495
+python arrangement_stress_test.py --a <qwen888_gauge.json> \
+       --b <gemma888_gauge.json> --ref-a <qwen60_gauge.json> \
+       --ref-b <gemma60_gauge.json>
+\end{verbatim}
+
 \texttt{arrangement\_law.py} carries the canonical matrices transcribed in
 its source with the regeneration commands in its header; the transcription
 was verified cell-by-cell against fresh \texttt{categories.py} runs before
@@ -2325,10 +2564,6 @@ Transformer Circuits Thread, Anthropic, 2021.
 \bibitem{barshalom2025} G.~Bar-Shalom, F.~Frasca, Y.~Galron, Y.~Ziser,
 H.~Maron. \emph{Beyond Token Probes: Hallucination Detection via Activation
 Tensors with ACT-ViT.} arXiv:2510.00296, 2025.
-
-\bibitem{counterfact} K.~Meng, D.~Bau, A.~Andonian, Y.~Belinkov.
-\emph{Locating and Editing Factual Associations in GPT.}
-NeurIPS, 2022. Dataset mirror: \texttt{NeelNanda/counterfact-tracing}.
 
 \bibitem{meng2022} K.~Meng, D.~Bau, A.~Andonian, Y.~Belinkov.
 \emph{Locating and Editing Factual Associations in GPT.}
